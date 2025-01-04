@@ -1,26 +1,27 @@
 # Install dependencies
-FROM node:18-alpine AS deps
+FROM node:18-alpine3.17 AS deps
 
 WORKDIR /app
 
 COPY package.json ./
 COPY yarn.lock ./
 
-RUN yarn install --frozen-lockfile
+RUN apk add --no-cache openssl && yarn install --frozen-lockfile
 
 # Build source code
-FROM node:18-alpine AS builder
+FROM node:18-alpine3.17 AS builder
 
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+RUN apk add --no-cache openssl
 RUN yarn db:generate
 RUN yarn build
 
 # Production runtime
-FROM node:18-alpine AS runner
+FROM node:18-alpine3.17 AS runner
 
 WORKDIR /app
 
@@ -33,7 +34,7 @@ EXPOSE 8080
 CMD yarn prod
 
 # Development runtime
-FROM node:18-alpine AS dev
+FROM node:18-alpine3.17 AS dev
 
 WORKDIR /app
 
@@ -43,4 +44,5 @@ COPY nodemon.json ./nodemon.json
 COPY tsconfig.json ./tsconfig.json
 COPY . .
 
+RUN apk add --no-cache openssl
 CMD yarn dev
