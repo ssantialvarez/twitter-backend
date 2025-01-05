@@ -1,0 +1,9 @@
+"email":"santiagoalvarez@gmail.com",
+"username":"ssantialvarezz",
+"password":"%homeroPULG0S0%"
+
+"email":"gianlugodard@gmail.com",
+"username":"pepoguardiosito",
+"password":"%homeroPULG0S0%"
+
+
