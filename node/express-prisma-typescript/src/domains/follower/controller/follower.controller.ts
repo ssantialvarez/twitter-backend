@@ -6,7 +6,6 @@ import { db } from '@utils'
 
 import { FollowerRepositoryImpl } from '../repository'
 import { FollowerService, FollowerServiceImpl } from '../service'
-import { FollowDTO } from '../dto'
 
 export const followerRouter = Router()
 
@@ -17,16 +16,16 @@ followerRouter.post('/follow/:userId', async (req: Request, res: Response) => {
   const { userId: followerId } = res.locals.context
   const { userId: followedId } = req.params
   
-  service.followUser(followerId,followedId)
+  await service.followUser(followerId,followedId)
   
-  return res.status(HttpStatus.ACCEPTED)
+  return res.sendStatus(HttpStatus.OK)
 })
 
-followerRouter.post('/unfollow/:user_id', async (req: Request, res: Response) => {
-  const { followerId } = res.locals.context
+followerRouter.post('/unfollow/:userId', async (req: Request, res: Response) => {
+  const { userId: followerId } = res.locals.context
   const { userId: followedId } = req.params
   
-  service.unfollowUser(followerId, followedId)  
+  await service.unfollowUser(followerId, followedId)  
   
-  return res.status(HttpStatus.CREATED)
+  return res.sendStatus(HttpStatus.OK)
 })

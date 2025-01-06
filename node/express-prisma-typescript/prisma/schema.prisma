@@ -24,6 +24,8 @@ model User {
   email    String  @unique // Unique constraint
   password String
 
+  public   Boolean @default(true)//TRUE = public account, FALSE = private account
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Optional value
@@ -31,11 +33,10 @@ model User {
   posts     Post[]
   follows   Follow[] @relation(name: "follows")
   followers Follow[] @relation(name: "followers")
+  reactions Reaction[]
 }
 
 model Follow {
-  id String @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
-
   followerId String @db.Uuid()
   followedId String @db.Uuid()
 
@@ -43,14 +44,14 @@ model Follow {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Optional value
 
-  follower User @relation(name: "follows", fields: [followerId], references: [id], onDelete: Cascade) // One to many
-  followed User @relation(name: "followers", fields: [followedId], references: [id], onDelete: Cascade) // One to many
+  follower User @relation(name: "follows", fields: [followerId], references: [id], onDelete: Cascade) 
+  followed User @relation(name: "followers", fields: [followedId], references: [id], onDelete: Cascade)
 
-  @@id([id,followerId,followedId])
+  @@id([followedId,followerId])
 }
 
 model Post {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+  id String @default(dbgenerated("gen_random_uuid()")) @db.Uuid @unique// Primary Key
 
   authorId String   @db.Uuid // Foreign Key
   content  String   @db.VarChar(240) // Limit the content to 240 characters
@@ -61,4 +62,25 @@ model Post {
   deletedAt DateTime? // Optional value
 
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
+
+  reactions Reaction[]
+
+  @@id([id, authorId])
+}
+
+model Reaction{
+  authorId String   @db.Uuid // Foreign Key
+  postId   String   @db.Uuid // Foreign Key
+
+  like     Boolean?
+  retweet  Boolean?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Optional value
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([authorId, postId])
 }
