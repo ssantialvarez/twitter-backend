@@ -25,7 +25,7 @@ model User {
   password String
 
   public   Boolean @default(true)//TRUE = public account, FALSE = private account
-
+  profilePicture String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Optional value

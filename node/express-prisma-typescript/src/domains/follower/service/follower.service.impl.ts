@@ -8,7 +8,7 @@ export class FollowerServiceImpl implements FollowerService {
   async followUser (followerId: string, followedId: string): Promise<void> {
     //verify the user wont follow himself
     if(followedId == followerId)
-      throw new ConflictException()
+      throw new ConflictException("User cannot follow himself.")
     return this.repository.follow(followerId,followedId);
   }
 

@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { FollowerRepository } from './follower.repository'
+import { FollowDTO } from '../dto'
+
 
 export class FollowerRepositoryImpl implements FollowerRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -35,6 +37,17 @@ export class FollowerRepositoryImpl implements FollowerRepository {
       }
     })
     
+  }
+
+  async isFollowing (followerId: string, followedId: string): Promise<FollowDTO | null>{
+
+    return await this.db.follow.findFirst({
+      where: {
+        followedId: followedId,
+        followerId: followerId,
+        deletedAt: null
+      }
+    })        
   }
   
 }

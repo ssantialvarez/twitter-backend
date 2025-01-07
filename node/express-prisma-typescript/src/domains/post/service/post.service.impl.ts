@@ -2,11 +2,16 @@ import { CreatePostInputDTO, PostDTO } from '../dto'
 import { PostRepository } from '../repository'
 import { PostService } from '.'
 import { validate } from 'class-validator'
-import { ForbiddenException, NotFoundException } from '@utils'
+import { ConflictException, ForbiddenException, NotFoundException } from '@utils'
 import { CursorPagination } from '@types'
+import { FollowerRepository } from '@domains/follower/repository'
+import { UserRepository } from '@domains/user/repository'
 
 export class PostServiceImpl implements PostService {
-  constructor (private readonly repository: PostRepository) {}
+  constructor (
+    private readonly repository: PostRepository, 
+    private readonly followRepository: FollowerRepository, 
+    private readonly userRepository: UserRepository) {}
 
   async createPost (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     await validate(data)
@@ -22,8 +27,16 @@ export class PostServiceImpl implements PostService {
 
   async getPost (userId: string, postId: string): Promise<PostDTO> {
     // TODO: validate that the author has public profile or the user follows the author
+    // almost done
     const post = await this.repository.getById(postId)
     if (!post) throw new NotFoundException('post')
+
+    const isPublic = await this.userRepository.isPublic(post.authorId)
+    const isFollowing = await this.followRepository.isFollowing(userId,post.authorId)
+        
+    if(!isPublic && isFollowing == null)
+      throw new NotFoundException("Post")
+    
     return post
   }
 
@@ -34,6 +47,15 @@ export class PostServiceImpl implements PostService {
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<PostDTO[]> {
     // TODO: throw exception when the author has a private profile and the user doesn't follow them
+    // almost done
+    
+    const isPublic = await this.userRepository.isPublic(authorId)
+    const isFollowing = await this.followRepository.isFollowing(userId,authorId)
+
+    if(!isPublic && isFollowing == null)
+      throw new NotFoundException("Post")
+
+    
     return await this.repository.getByAuthorId(authorId)
   }
 }
