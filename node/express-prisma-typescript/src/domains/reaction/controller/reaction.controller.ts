@@ -6,6 +6,8 @@ import 'express-async-errors'
 import { db } from '@utils'
 import { ReactionRepositoryImpl } from '../repository'
 import { ReactionService, ReactionServiceImpl } from '../service'
+import { ReactionType } from '../dto'
+
 
 
 export const reactionRouter = Router()
@@ -15,8 +17,15 @@ const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryI
 
 
 
-//reactionRouter.post()
+reactionRouter.post('/:postId', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const { postId } = req.params
+  const reaction = req.query as any as ReactionType
+  await service.insertReaction(userId,postId,reaction)
+  
 
+  return res.sendStatus(HttpStatus.OK)
+})
 
 
 
