@@ -5,7 +5,6 @@
   - You are about to drop the column `id` on the `Follow` table. All the data in the column will be lost.
   - The primary key for the `Post` table will be changed. If it partially fails, the table could be left without primary key constraint.
   - A unique constraint covering the columns `[id]` on the table `Post` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `public` to the `User` table without a default value. This is not possible if the table is not empty.
 
 */
 -- AlterTable
@@ -18,7 +17,8 @@ ALTER TABLE "Post" DROP CONSTRAINT "Post_pkey",
 ADD CONSTRAINT "Post_pkey" PRIMARY KEY ("id", "authorId");
 
 -- AlterTable
-ALTER TABLE "User" ADD COLUMN     "public" BOOLEAN NOT NULL;
+ALTER TABLE "User" ADD COLUMN     "profilePicture" TEXT,
+ADD COLUMN     "public" BOOLEAN NOT NULL DEFAULT true;
 
 -- CreateTable
 CREATE TABLE "Reaction" (

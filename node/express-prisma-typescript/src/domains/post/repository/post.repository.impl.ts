@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { getAllByDate } from '@prisma/client/sql'
 
 import { CursorPagination } from '@types'
 
@@ -18,8 +19,56 @@ export class PostRepositoryImpl implements PostRepository {
     return new PostDTO(post)
   }
 
-  async getAllByDatePaginated (options: CursorPagination): Promise<PostDTO[]> {
-    const posts = await this.db.post.findMany({
+  async getAllByDatePaginated (userId: string, options: CursorPagination): Promise<PostDTO[]> {   
+    const limit = options.limit ?  options.limit.toString() : 'ALL'
+    const offset = options.after ?? options.before ? 1 : 0
+    
+    
+    const posts = await this.db.$queryRawTyped(getAllByDate(userId,limit,offset))
+    
+    return posts as PostDTO[]
+
+
+
+    /*
+
+
+    const select = `SELECT "t1"."id", "t1"."authorId", "t1"."content", "t1"."images", "t1"."createdAt"`
+    const from = `FROM ("public"."Post" AS "t1" JOIN "public"."Follow" AS "t2" ON "t1"."authorId" = "t2"."followedId" AND "t2"."followerId" = ${userId}::uuid AND "t2"."deletedAt" is null)`
+    if(options.before){
+      query = Prisma.sql` 
+      SELECT "t1"."id", "t1"."authorId", "t1"."content", "t1"."images", "t1"."createdAt"
+      FROM ("public"."Post" AS "t1" JOIN "public"."Follow" AS "t2" ON "t1"."authorId" = "t2"."followedId" AND "t2"."followerId" = ${userId}::uuid AND "t2"."deletedAt" is null)
+      WHERE ((
+        "t1"."createdAt" = (SELECT "t3"."createdAt" FROM "public"."Post" AS "t3" WHERE ("t3"."id") = (${options.before}::uuid) LIMIT 1) 
+        AND "t1"."id" <= (SELECT "t3"."id" FROM "public"."Post" AS "t3" WHERE ("t3"."id") = (${options.before}::uuid) LIMIT 1)) 
+        OR ("t1"."createdAt" > (SELECT "t3"."createdAt" FROM "public"."Post" AS "t3" WHERE ("t3"."id") = (${options.before}::uuid) LIMIT 1)))
+      ORDER BY "t1"."createdAt" ASC, "t1"."id" DESC 
+      LIMIT ${limit}
+      OFFSET ${offset}`
+      
+    }else if(options.after){
+      query = Prisma.sql` 
+      SELECT "t1"."id", "t1"."authorId", "t1"."content", "t1"."images", "t1"."createdAt"
+      FROM ("public"."Post" AS "t1" JOIN "public"."Follow" AS "t2" ON "t1"."authorId" = "t2"."followedId" AND "t2"."followerId" = ${userId}::uuid AND "t2"."deletedAt" is null)
+      WHERE ((
+        "t1"."createdAt" = (SELECT "t3"."createdAt" FROM "public"."Post" AS "t3" WHERE ("t3"."id") = (${options.after}::uuid)) 
+        AND "t1"."id" >= (SELECT "t3"."id" FROM "public"."Post" AS "t3" WHERE ("t3"."id") = (${options.after}::uuid))) 
+        OR ("t1"."createdAt" < (SELECT "t3"."createdAt" FROM "public"."Post" AS "t3" WHERE ("t3"."id") = (${options.after}::uuid))))
+      ORDER BY "t1"."createdAt" DESC, "t1"."id" ASC 
+      LIMIT ${limit}
+      OFFSET ${offset}`
+    }else{
+      query = Prisma.sql` 
+      SELECT "t1"."id", "t1"."authorId", "t1"."content", "t1"."images", "t1"."createdAt"
+      FROM ("public"."Post" AS "t1" JOIN "public"."Follow" AS "t2" ON "t1"."authorId" = "t2"."followedId" AND "t2"."followerId" = (${userId}::uuid) AND "t2"."deletedAt" is null)
+      ORDER BY "t1"."createdAt" DESC, "t1"."id" ASC 
+      LIMIT ${limit}
+      OFFSET ${offset}`
+
+    }
+    
+    const aux = await this.db.post.findMany({
       cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
       take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
@@ -32,7 +81,8 @@ export class PostRepositoryImpl implements PostRepository {
         }
       ]
     })
-    return posts.map(post => new PostDTO(post))
+    
+    return aux.map(post => new PostDTO(post))*/
   }
 
   async delete (postId: string): Promise<void> {
