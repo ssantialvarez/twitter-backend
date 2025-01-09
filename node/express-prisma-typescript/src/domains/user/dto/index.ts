@@ -1,3 +1,5 @@
+import { isBoolean, IsEmail, IsBoolean, IsOptional, IsString, IsStrongPassword } from 'class-validator'
+
 export class UserDTO {
   constructor (user: UserDTO) {
     this.id = user.id
@@ -18,8 +20,9 @@ export class ExtendedUserDTO extends UserDTO {
     this.email = user.email
     this.username = user.username
     this.password = user.password
+    this.public = user.public
   }
-
+  public!:boolean
   email!: string
   username!: string
   password!: string
@@ -36,4 +39,33 @@ export class UserViewDTO {
   name: string | null
   username: string
   profilePicture: string | null
+}
+
+
+export class UpdateInputDTO {
+  @IsOptional()
+  @IsString()
+  @IsEmail()
+    email?: string
+
+  @IsOptional()
+  @IsString()
+    username?: string
+
+  @IsOptional()
+  @IsString()
+    name?: string
+
+  @IsOptional()
+  @IsString()
+    profilePicture?: string
+
+  @IsOptional()
+  @IsBoolean()
+    public?: boolean
+
+  @IsOptional()
+  @IsString()
+  @IsStrongPassword()
+    password?: string
 }

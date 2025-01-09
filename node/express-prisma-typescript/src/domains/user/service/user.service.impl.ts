@@ -1,6 +1,6 @@
 import { NotFoundException } from '@utils/errors'
 import { OffsetPagination } from 'types'
-import { UserViewDTO } from '../dto'
+import { UserViewDTO, ExtendedUserDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
 import { FollowerRepository } from '@domains/follower/repository'
@@ -29,6 +29,12 @@ export class UserServiceImpl implements UserService {
   async checkFollow (followerId: string, followedId: string): Promise<Boolean> {
     
 
-    return this.followerRepository.isFollowing(followerId, followedId) != null;
+    return await this.followerRepository.isFollowing(followerId, followedId) != null;
+  }
+
+
+  async updateUser(userId: any, data: ExtendedUserDTO) : Promise<UserViewDTO> {
+
+    return await this.repository.update(userId,data)
   }
 }

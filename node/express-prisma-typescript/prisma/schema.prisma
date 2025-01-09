@@ -6,7 +6,7 @@
 // You can find more about generators here: https://www.prisma.io/docs/concepts/components/prisma-schema/generators
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["typedSql"]
+  
 }
 
 // The datasource block specifies the url to your DBMS.

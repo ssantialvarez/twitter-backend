@@ -7,5 +7,8 @@
 "email":"bautistaleguizamon@gmail.com",
 "username":"LeguiBauti",
 
+"email":"jurromero7@gmail.com",
+"username":"juromeroo",
+
 
 "password":"*n.T5?6&!E4"

@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-import { getAllByDate } from '@prisma/client/sql'
+import { PrismaClient, Prisma, Post } from '@prisma/client'
+
 
 import { CursorPagination } from '@types'
 
@@ -20,19 +20,24 @@ export class PostRepositoryImpl implements PostRepository {
   }
 
   async getAllByDatePaginated (userId: string, options: CursorPagination): Promise<PostDTO[]> {   
+    
+    
     const limit = options.limit ?  options.limit.toString() : 'ALL'
     const offset = options.after ?? options.before ? 1 : 0
     
     
-    const posts = await this.db.$queryRawTyped(getAllByDate(userId,limit,offset))
+    let aux = Prisma.sql`SELECT * FROM "public"."Post" WHERE ("id") = (${options.before}::uuid) LIMIT 1`
+    const result = await this.db.$queryRaw<Post>(aux);
+    console.log(result)
+    console.log(result.id)
+    console.log(result.createdAt)
     
-    return posts as PostDTO[]
 
 
+    let query = Prisma.sql`SELECT "t1"."id", "t1"."authorId", "t1"."content", "t1"."images", "t1"."createdAt"`
+    
 
     /*
-
-
     const select = `SELECT "t1"."id", "t1"."authorId", "t1"."content", "t1"."images", "t1"."createdAt"`
     const from = `FROM ("public"."Post" AS "t1" JOIN "public"."Follow" AS "t2" ON "t1"."authorId" = "t2"."followedId" AND "t2"."followerId" = ${userId}::uuid AND "t2"."deletedAt" is null)`
     if(options.before){
@@ -67,8 +72,8 @@ export class PostRepositoryImpl implements PostRepository {
       OFFSET ${offset}`
 
     }
-    
-    const aux = await this.db.post.findMany({
+    */
+    const posts = await this.db.post.findMany({
       cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
       take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
@@ -82,7 +87,7 @@ export class PostRepositoryImpl implements PostRepository {
       ]
     })
     
-    return aux.map(post => new PostDTO(post))*/
+    return posts.map(post => new PostDTO(post))
   }
 
   async delete (postId: string): Promise<void> {
