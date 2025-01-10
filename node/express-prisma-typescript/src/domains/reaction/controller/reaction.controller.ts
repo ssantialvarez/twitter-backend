@@ -6,7 +6,7 @@ import 'express-async-errors'
 import { db } from '@utils'
 import { ReactionRepositoryImpl } from '../repository'
 import { ReactionService, ReactionServiceImpl } from '../service'
-import { ReactionType } from '../dto'
+import { ReactionType } from '@prisma/client'
 
 
 
@@ -20,12 +20,23 @@ const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryI
 reactionRouter.post('/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { postId } = req.params
-  const reaction = req.query as any as ReactionType
-  await service.insertReaction(userId,postId,reaction)
+  
+
+  
+    
+  await service.insertReaction(userId,postId,req.query.reaction as ReactionType)
   
 
   return res.sendStatus(HttpStatus.OK)
 })
 
+reactionRouter.delete('/:postId', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const { postId } = req.params
+  
+  await service.deleteReaction(userId,postId,req.query.reaction as ReactionType)
+  
 
+  return res.sendStatus(HttpStatus.OK)
+})
 

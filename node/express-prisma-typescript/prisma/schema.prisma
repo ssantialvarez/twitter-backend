@@ -6,7 +6,6 @@
 // You can find more about generators here: https://www.prisma.io/docs/concepts/components/prisma-schema/generators
 generator client {
   provider = "prisma-client-js"
-  output = "../../node_modules/.prisma/client"
 }
 
 // The datasource block specifies the url to your DBMS.
@@ -73,7 +72,7 @@ model Reaction{
   userId String   @db.Uuid // Foreign Key
   postId   String   @db.Uuid // Foreign Key
 
-  reaction ReactionType
+  reaction ReactionType 
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -82,7 +81,7 @@ model Reaction{
   user User @relation(fields: [userId], references: [id], onDelete: Cascade) // One to many
   post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  @@id([userId, postId])
+  @@id([userId, postId, reaction])
 }
 
 enum ReactionType {

@@ -1,10 +1,11 @@
-import { PrismaClient, Prisma, Post } from '@prisma/client'
+import { PrismaClient, Prisma, Post, ReactionType } from '@prisma/client'
 
 
 import { CursorPagination } from '@types'
 
 import { PostRepository } from '.'
 import { CreatePostInputDTO, PostDTO } from '../dto'
+import { reactionRouter } from '@domains/reaction'
 
 export class PostRepositoryImpl implements PostRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -20,8 +21,30 @@ export class PostRepositoryImpl implements PostRepository {
   }
 
   async getAllByDatePaginated (userId: string, options: CursorPagination): Promise<PostDTO[]> {   
+
+    const posts = await this.db.post.findMany({
+      where:{
+        author:{
+          followers:{some:{followerId: userId}}
+        }
+      },
+      cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
+      skip: options.after ?? options.before ? 1 : undefined,
+      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
+      orderBy: [
+        {
+          createdAt: 'desc'
+        },
+        {
+          id: 'asc'
+        }
+      ]
+    })
+    console.log(posts)
+    return posts.map(post => new PostDTO(post))
     
-    
+
+    /*
     const limit = options.limit ?  options.limit : null
     const offset = options.after ?? options.before ? 1 : 0
     
@@ -43,15 +66,16 @@ export class PostRepositoryImpl implements PostRepository {
     ${subQuery}
     LIMIT ${limit}
     OFFSET ${offset}`    
-    console.log(query.values)
+    
     let posts = await this.db.$queryRaw<Post[]>(query)
 
-    console.log(posts)
+    
     
     if(options.before)
       posts.sort(compare)
     return posts.map(post => new PostDTO(post))
-  }
+    */
+    }
 
   async delete (postId: string): Promise<void> {
     await this.db.post.delete({
@@ -71,6 +95,17 @@ export class PostRepositoryImpl implements PostRepository {
   }
 
   async getByAuthorId (authorId: string): Promise<PostDTO[]> {
+    
+    /*
+    const usersWithCount = await this.db.post.findMany({
+      select: {
+        _count: {
+          select: {reactions: {where: {reaction: ReactionType.LIKE}}}
+        },
+      },
+    })
+    console.log(usersWithCount)
+    */
     const posts = await this.db.post.findMany({
       where: {
         authorId
