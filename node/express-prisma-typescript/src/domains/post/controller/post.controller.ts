@@ -22,6 +22,7 @@ postRouter.get('/', async (req: Request, res: Response) => {
 
   const posts = await service.getLatestPosts(userId, { limit: Number(limit), before, after })
 
+  
   return res.status(HttpStatus.OK).json(posts)
 })
 

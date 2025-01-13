@@ -1,6 +1,6 @@
 import { CommentService } from '.'
 import { CursorPagination } from '@types'
-import { CreatePostInputDTO, PostDTO } from '@domains/post/dto'
+import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '@domains/post/dto'
 import { CommentRepository } from '../repository'
 import { FollowerRepository } from '@domains/follower/repository'
 import { UserRepository } from '@domains/user/repository'
@@ -36,7 +36,7 @@ export class CommentServiceImpl implements CommentService {
 
   }
   
-  async getCommentsByPost (postId: string, options: CursorPagination): Promise<PostDTO[]> {
+  async getCommentsByPost (postId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
     
     return await this.repository.getAllByDatePaginated(postId, options)
   

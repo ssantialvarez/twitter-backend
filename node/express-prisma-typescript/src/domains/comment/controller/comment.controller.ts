@@ -25,8 +25,6 @@ commentRouter.post('/:postId', BodyValidation(CreatePostInputDTO), async (req: R
     const comment = await service.createComment(userId, postId, data)
     
     return res.status(HttpStatus.CREATED).json(comment) 
-
-
 })
 
 commentRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
@@ -40,11 +38,12 @@ commentRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
 
 commentRouter.get('/:postId', async (req: Request, res: Response) => {
     const { userId } = res.locals.context
+    const { postId } = req.params
     const { limit, before, after } = req.query as Record<string, string>
 
-    const posts = await service.getCommentsByPost(userId, { limit: Number(limit), before, after })
+    const posts = await service.getCommentsByPost(postId, { limit: Number(limit), before, after })
 
-    return res.sendStatus(HttpStatus.OK)
+    return res.status(HttpStatus.OK).json(posts)
 })
 
 

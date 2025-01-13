@@ -1,11 +1,12 @@
-import { PrismaClient, Prisma, Post, ReactionType } from '@prisma/client'
+import { PrismaClient, Prisma, Post, ReactionType, $Enums } from '@prisma/client'
 
 
 import { CursorPagination } from '@types'
 
 import { PostRepository } from '.'
-import { CreatePostInputDTO, PostDTO } from '../dto'
+import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto'
 import { reactionRouter } from '@domains/reaction'
+import { ExtendedUserDTO } from '@domains/user/dto'
 
 export class PostRepositoryImpl implements PostRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -20,8 +21,13 @@ export class PostRepositoryImpl implements PostRepository {
     return new PostDTO(post)
   }
 
-  async getAllByDatePaginated (userId: string, options: CursorPagination): Promise<PostDTO[]> {   
+  async getAllByDatePaginated (userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {   
     const posts = await this.db.post.findMany({
+      include:{
+        author: true,
+        reactions: true,
+        _count: {select: {comments: true}}
+      },
       where:{
         author:{
           followers:{some:{followerId: userId}}
@@ -41,7 +47,13 @@ export class PostRepositoryImpl implements PostRepository {
       ]
     })
     
-    return posts.map(post => new PostDTO(post))
+    return posts.map(post => new ExtendedPostDTO({
+      ...post,
+      author: new ExtendedUserDTO(post.author),
+      qtyComments: post._count.comments,
+      qtyLikes: post.reactions.filter(reaction => reaction.reaction == ReactionType.LIKE).length,
+      qtyRetweets: post.reactions.filter(reaction => reaction.reaction == ReactionType.RETWEET).length
+    }))
     }
 
   async delete (postId: string): Promise<void> {
@@ -61,15 +73,26 @@ export class PostRepositoryImpl implements PostRepository {
     return (post != null) ? new PostDTO(post) : null
   }
 
-  async getByAuthorId (authorId: string): Promise<PostDTO[]> {
+  async getByAuthorId (authorId: string): Promise<ExtendedPostDTO[]> {
     
     const posts = await this.db.post.findMany({
+      include:{
+        author: true,
+        reactions: true,
+        _count: {select: {comments: true}}
+      },
       where: {
         authorId
       }
     })
 
-
-    return posts.map(post => new PostDTO(post))
+    
+    return posts.map(post => new ExtendedPostDTO({
+      ...post,
+      author: new ExtendedUserDTO(post.author),
+      qtyComments: post._count.comments,
+      qtyLikes: post.reactions.filter(reaction => reaction.reaction == ReactionType.LIKE).length,
+      qtyRetweets: post.reactions.filter(reaction => reaction.reaction == ReactionType.RETWEET).length
+    }))
   }
 }

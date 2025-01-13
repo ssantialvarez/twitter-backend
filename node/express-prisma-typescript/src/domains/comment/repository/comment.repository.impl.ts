@@ -5,6 +5,7 @@ import { CursorPagination } from '@types'
 
 import { CommentRepository } from '.'
 import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '@domains/post/dto'
+import { ExtendedUserDTO } from '@domains/user/dto'
 
 export class CommentRepositoryImpl implements CommentRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -35,13 +36,16 @@ export class CommentRepositoryImpl implements CommentRepository {
   }
   
   
-  async getAllByDatePaginated (userId: string, options: CursorPagination): Promise<PostDTO[]> {   
+  async getAllByDatePaginated (postId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {   
 
-    const posts = await this.db.post.findMany({
+    const comments = await this.db.post.findMany({
+      include:{
+        author: true,
+        reactions: true,
+        _count: {select: {comments: true}}
+      },
       where:{
-        author:{
-          followers:{some:{followerId: userId}}
-        }
+        parentPostId: postId
       },
       cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
@@ -56,8 +60,13 @@ export class CommentRepositoryImpl implements CommentRepository {
       ]
     })
     
-    //return posts.map(post => new ExtendedPostDTO(post))
-    return []
+    return comments.map(comment => new ExtendedPostDTO({
+          ...comment,
+          author: new ExtendedUserDTO(comment.author),
+          qtyComments: comment._count.comments,
+          qtyLikes: comment.reactions.filter(reaction => reaction.reaction == ReactionType.LIKE).length,
+          qtyRetweets: comment.reactions.filter(reaction => reaction.reaction == ReactionType.RETWEET).length
+        }))
     }
 }
 
