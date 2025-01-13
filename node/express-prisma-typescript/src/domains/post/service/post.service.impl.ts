@@ -34,7 +34,7 @@ export class PostServiceImpl implements PostService {
     const isPublic = await this.userRepository.isPublic(post.authorId)
     const isFollowing = await this.followRepository.isFollowing(userId,post.authorId)
         
-    if(!isPublic && isFollowing == null)
+    if(!isPublic && isFollowing)
       throw new NotFoundException("Post")
     
     return post
@@ -52,7 +52,7 @@ export class PostServiceImpl implements PostService {
     const isPublic = await this.userRepository.isPublic(authorId)
     const isFollowing = await this.followRepository.isFollowing(userId,authorId)
 
-    if(!isPublic && isFollowing == null)
+    if(!isPublic && isFollowing)
       throw new NotFoundException("Post")
 
     

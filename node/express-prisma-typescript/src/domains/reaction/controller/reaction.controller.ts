@@ -36,8 +36,8 @@ reactionRouter.delete('/:postId', async (req: Request, res: Response) => {
   return res.sendStatus(HttpStatus.OK)
 })
 
-reactionRouter.get('/likes', async (req: Request, res: Response) => {
-  const { userId } = res.locals.context
+reactionRouter.get('/likes/:userId', async (req: Request, res: Response) => {
+  const { userId } = req.params
 
   
   const reactions = await service.getReactionByUserId(userId,ReactionType.LIKE)
@@ -45,10 +45,9 @@ reactionRouter.get('/likes', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json(reactions)
 })
 
-reactionRouter.get('/retweets', async (req: Request, res: Response) => {
-  const { userId } = res.locals.context
+reactionRouter.get('/retweets/:userId', async (req: Request, res: Response) => {
+  const { userId } = req.params
 
-  
   const reactions = await service.getReactionByUserId(userId,ReactionType.RETWEET)
   
   return res.status(HttpStatus.OK).json(reactions)

@@ -29,9 +29,15 @@ export class UserServiceImpl implements UserService {
   async checkFollow (followerId: string, followedId: string): Promise<Boolean> {
     
 
-    return await this.followerRepository.isFollowing(followerId, followedId) != null;
+    return await this.followerRepository.isFollowing(followerId, followedId);
   }
 
+
+  async getByUsername (username: string, options: OffsetPagination): Promise<UserViewDTO[]>{
+    
+
+    return []
+  }
 
   async updateUser(userId: any, data: ExtendedUserDTO) : Promise<UserViewDTO> {
 

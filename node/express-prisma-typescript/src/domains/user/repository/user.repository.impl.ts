@@ -77,4 +77,16 @@ export class UserRepositoryImpl implements UserRepository {
       data: data
     })
   }
+
+
+  async getByUsername (username: string, options: OffsetPagination): Promise<ExtendedUserDTO[]>{
+
+    
+
+
+    return []
+  }
+
+
+
 }

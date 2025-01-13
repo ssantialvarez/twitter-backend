@@ -39,15 +39,17 @@ export class FollowerRepositoryImpl implements FollowerRepository {
     
   }
 
-  async isFollowing (followerId: string, followedId: string): Promise<FollowDTO | null>{
+  async isFollowing (followerId: string, followedId: string): Promise<Boolean>{
 
-    return await this.db.follow.findFirst({
+    const result = await this.db.follow.findFirst({
       where: {
         followedId: followedId,
         followerId: followerId,
         deletedAt: null
       }
-    })        
+    }) 
+    
+    return result != null
   }
   
 }

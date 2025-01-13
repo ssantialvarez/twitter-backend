@@ -6,7 +6,8 @@ export interface UserService {
   getUser: (userId: any) => Promise<UserViewDTO>
   getUserRecommendations: (userId: any, options: OffsetPagination) => Promise<UserViewDTO[]>
 
-  checkFollow: (followerId: string, followedId: string) => Promise<Boolean>
-
+  getByUsername: (username: string, options: OffsetPagination) => Promise<UserViewDTO[]>
   updateUser: (userId: any, data: ExtendedUserDTO) => Promise<UserViewDTO>
+
+  checkFollow: (followerId: string, followedId: string) => Promise<Boolean>
 }

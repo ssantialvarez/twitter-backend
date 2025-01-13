@@ -4,12 +4,38 @@ import { PrismaClient, Prisma, Post, ReactionType } from '@prisma/client'
 import { CursorPagination } from '@types'
 
 import { CommentRepository } from '.'
-import { ExtendedPostDTO } from '@domains/post/dto'
+import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '@domains/post/dto'
 
 export class CommentRepositoryImpl implements CommentRepository {
   constructor (private readonly db: PrismaClient) {}
 
-  async getAllByDatePaginated (userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {   
+  
+  async create (userId: string, postId: string, data: CreatePostInputDTO): Promise<PostDTO> {
+
+    const comment = await this.db.post.create({
+      data:{
+        authorId: userId,
+        parentPostId: postId,
+        ...data
+      }
+    })
+
+    return new PostDTO(comment)
+  } 
+
+  async getByUserId(authorId: string): Promise<PostDTO[]>{
+    const comments = await this.db.post.findMany({
+      where:{
+        authorId: authorId,
+        parentPostId: {not: null}
+      }
+    })
+
+    return comments.map(com => new PostDTO(com))
+  }
+  
+  
+  async getAllByDatePaginated (userId: string, options: CursorPagination): Promise<PostDTO[]> {   
 
     const posts = await this.db.post.findMany({
       where:{
@@ -29,7 +55,7 @@ export class CommentRepositoryImpl implements CommentRepository {
         }
       ]
     })
-    console.log(posts)
+    
     //return posts.map(post => new ExtendedPostDTO(post))
     return []
     }

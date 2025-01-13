@@ -1,6 +1,8 @@
-import { ExtendedPostDTO } from "@domains/post/dto";
+import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from "@domains/post/dto";
 import { CursorPagination } from "@types";
 
 export interface CommentService {
-  getCommentsByPost: (postId: string, options: CursorPagination) => Promise<ExtendedPostDTO[]>  
+  getCommentsByUser: (authorId: string, userId: string) => Promise<PostDTO[]>
+  getCommentsByPost: (postId: string, options: CursorPagination) => Promise<PostDTO[]>
+  createComment: (userId: string, postId: string, data: CreatePostInputDTO) => Promise<PostDTO>
 }

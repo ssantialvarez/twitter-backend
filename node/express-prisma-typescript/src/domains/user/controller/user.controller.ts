@@ -36,11 +36,18 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
   const { userId: otherUserId } = req.params
   const { userId } = res.locals.context
   const user = await service.getUser(otherUserId)
-  const follow = await service.checkFollow(otherUserId, userId)
+  const followsYou = await service.checkFollow(otherUserId, userId)
   
-  const result = {user, follow}
+  const result = {user, followsYou}
   
   return res.status(HttpStatus.OK).json(result)
+})
+
+userRouter.get('/by_username/:username', async (req: Request, res: Response) => {
+  const { username } = req.params
+  const { userId } = res.locals.context
+  
+  return res.status(HttpStatus.OK)
 })
 
 userRouter.delete('/', async (req: Request, res: Response) => {
