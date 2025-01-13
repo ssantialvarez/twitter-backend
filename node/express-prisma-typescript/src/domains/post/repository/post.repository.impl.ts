@@ -114,13 +114,3 @@ export class PostRepositoryImpl implements PostRepository {
     return posts.map(post => new PostDTO(post))
   }
 }
-
-
-
-const compare = function(a:Post, b:Post) {
-  const comp = b.createdAt.getTime() - a.createdAt.getTime()
-  if(comp == 0){
-    return b.id.localeCompare(a.id)
-  }
-  return comp
-}

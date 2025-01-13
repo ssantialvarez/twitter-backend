@@ -10,6 +10,10 @@ export class CreatePostInputDTO {
   @IsOptional()
   @MaxLength(4)
     images?: string[]
+
+  @IsString()
+  @IsOptional()
+    parentPostId?: string   
 }
 
 export class PostDTO {
