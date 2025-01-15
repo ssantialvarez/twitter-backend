@@ -27,7 +27,7 @@ const options = {
       },
     ],
   },
-  apis: ["./src/domains/**/controller/*.ts"],
+  apis: ["./src/router/index.ts"],
 };
 
 

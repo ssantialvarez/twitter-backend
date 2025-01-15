@@ -36,19 +36,11 @@ reactionRouter.delete('/:postId', async (req: Request, res: Response) => {
   return res.sendStatus(HttpStatus.OK)
 })
 
-reactionRouter.get('/likes/:userId', async (req: Request, res: Response) => {
+reactionRouter.get('/:userId', async (req: Request, res: Response) => {
   const { userId } = req.params
 
   
-  const reactions = await service.getReactionByUserId(userId,ReactionType.LIKE)
-  
-  return res.status(HttpStatus.OK).json(reactions)
-})
-
-reactionRouter.get('/retweets/:userId', async (req: Request, res: Response) => {
-  const { userId } = req.params
-
-  const reactions = await service.getReactionByUserId(userId,ReactionType.RETWEET)
+  const reactions = await service.getReactionByUserId(userId,req.query.reaction as ReactionType)
   
   return res.status(HttpStatus.OK).json(reactions)
 })

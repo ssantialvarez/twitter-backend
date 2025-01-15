@@ -17,7 +17,13 @@ export class ReactionServiceImpl implements ReactionService {
   }
 
   async getReactionByUserId (userId: any, reaction: ReactionType): Promise<ReactionDTO[]>{
-    return await this.repository.getReactionByUserId(userId,reaction)
+    
+    if(ReactionType.LIKE == reaction || ReactionType.RETWEET == reaction)
+      return await this.repository.getReactionByUserId(userId,reaction)
+    else
+      throw new ForbiddenException()
+    
+    
   }
 
   async deleteReaction (userId: any, postId: any, reaction: ReactionType): Promise<void>{
