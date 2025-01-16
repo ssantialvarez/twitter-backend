@@ -64,8 +64,8 @@ userRouter.put('/', BodyValidation(UpdateInputDTO), async (req: Request, res: Re
   const { userId } = res.locals.context
   const data = req.body
 
-  await service.updateUser(userId, data)
+  const user_url = await service.updateUser(userId, data)
 
-  return res.sendStatus(HttpStatus.OK)
+  return res.status(HttpStatus.OK).json(user_url)
 })
 

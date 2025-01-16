@@ -4,6 +4,9 @@ import { UserViewDTO, ExtendedUserDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
 import { FollowerRepository } from '@domains/follower/repository'
+import { generatePresignedUrl } from '@utils'
+import {v4 as uuidv4} from 'uuid';
+
 
 export class UserServiceImpl implements UserService {
   constructor (private readonly repository: UserRepository, private readonly followerRepository: FollowerRepository) {}
@@ -39,8 +42,23 @@ export class UserServiceImpl implements UserService {
     return await this.repository.getByUsername(username,options)
   }
 
-  async updateUser(userId: any, data: ExtendedUserDTO) : Promise<UserViewDTO> {
+  async updateUser(userId: any, data: ExtendedUserDTO) : Promise<{user: UserViewDTO, url: string}> {
+    let url = ''
+    if(data.profilePicture){
+      try{
+        let image = data.profilePicture
+        let arr = image.split('.')
+        let imageName = arr.at(0) as string
+        imageName = imageName.concat("__"+uuidv4())
+        image = imageName.concat('.'+arr.at(1))
+        data.profilePicture = image
 
-    return await this.repository.update(userId,data)
+        url = await generatePresignedUrl({key: image})
+      } catch(error){
+        console.log(error)
+      }
+    }
+    const user = await this.repository.update(userId,data)
+    return {user, url}
   }
 }

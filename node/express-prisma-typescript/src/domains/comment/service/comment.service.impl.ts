@@ -6,6 +6,7 @@ import { FollowerRepository } from '@domains/follower/repository'
 import { UserRepository } from '@domains/user/repository'
 import { PostRepository } from '@domains/post/repository'
 import { NotFoundException } from '@utils'
+import { validate } from 'class-validator'
 
 export class CommentServiceImpl implements CommentService {
   constructor (
@@ -26,7 +27,7 @@ export class CommentServiceImpl implements CommentService {
     if(!(authorIsPublic || follows))
       throw new NotFoundException('post')
 
-  
+    await validate(data)
     return await this.repository.create(userId, postId, data)
   }
 
