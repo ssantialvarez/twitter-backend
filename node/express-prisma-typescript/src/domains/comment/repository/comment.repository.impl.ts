@@ -5,7 +5,7 @@ import { CursorPagination } from '@types'
 
 import { CommentRepository } from '.'
 import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '@domains/post/dto'
-import { ExtendedUserDTO } from '@domains/user/dto'
+import { ExtendedUserDTO, UserViewDTO } from '@domains/user/dto'
 
 export class CommentRepositoryImpl implements CommentRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -52,17 +52,15 @@ export class CommentRepositoryImpl implements CommentRepository {
       take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
       orderBy: [
         {
-          createdAt: 'desc'
-        },
-        {
-          id: 'asc'
+          reactions: {_count: 'desc'}
+          
         }
       ]
     })
     
     return comments.map(comment => new ExtendedPostDTO({
           ...comment,
-          author: new ExtendedUserDTO(comment.author),
+          author: new UserViewDTO(comment.author),
           qtyComments: comment._count.comments,
           qtyLikes: comment.reactions.filter(reaction => reaction.reaction == ReactionType.LIKE).length,
           qtyRetweets: comment.reactions.filter(reaction => reaction.reaction == ReactionType.RETWEET).length

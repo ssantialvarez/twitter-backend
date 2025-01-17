@@ -12,5 +12,5 @@ export interface UserRepository {
   getByUsername: (username: string, options: CursorPagination) => Promise<UserViewDTO[]>
 
   isPublic: (userId: string) => Promise<Boolean>
-  update: (userId: string, data:ExtendedUserDTO) => Promise<UserViewDTO>
+  update: (userId: string, data:ExtendedUserDTO) => Promise<ExtendedUserDTO>
 }

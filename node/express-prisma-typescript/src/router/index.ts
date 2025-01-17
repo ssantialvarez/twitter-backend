@@ -9,6 +9,7 @@ import { healthRouter } from '@domains/health'
 import { followerRouter } from '@domains/follower'
 import { reactionRouter } from '@domains/reaction'
 import { commentRouter } from '@domains/comment'
+import { chatRouter } from '@domains/chat'
 
 export const router = Router()
 
@@ -19,6 +20,7 @@ router.use('/post', withAuth, postRouter)
 router.use('/comment', withAuth, commentRouter)
 router.use('/follower', withAuth, followerRouter)
 router.use('/reaction', withAuth, reactionRouter)
+router.use('/chat', withAuth, chatRouter)
 
 
 /**
@@ -75,6 +77,9 @@ router.use('/reaction', withAuth, reactionRouter)
  *         token:
  *           type: string
  *           description: JWT token 
+ *     PresignedURL:
+ *       type: string
+ *       description: A presigned url to upoload images to the Amazon S3 bucket.
  *     UserView:
  *       type: object
  *       properties:
@@ -299,7 +304,14 @@ router.use('/reaction', withAuth, reactionRouter)
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 oneOf:
+ *                   - $ref: '#/components/schemas/ExtendedUser'
+ *                   - $ref: '#/components/schemas/PresignedURL'
  *       401:
  *          $ref: '#/components/responses/UnauthorizedError'
  *       500:
@@ -407,7 +419,14 @@ router.use('/reaction', withAuth, reactionRouter)
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Post'
+ *               type: array
+ *               items:
+ *                 oneOf:
+ *                   - $ref: '#/components/schemas/Post'
+ *                   - type: array
+ *                     items:
+ *                       $ref: '#/components/schemas/PresignedURL'
+ *                     maxItems: 4 
  *       401:
  *          $ref: '#/components/responses/UnauthorizedError'
  *       500:

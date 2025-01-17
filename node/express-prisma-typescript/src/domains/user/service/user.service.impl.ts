@@ -42,7 +42,7 @@ export class UserServiceImpl implements UserService {
     return await this.repository.getByUsername(username,options)
   }
 
-  async updateUser(userId: any, data: ExtendedUserDTO) : Promise<{user: UserViewDTO, url: string}> {
+  async updateUser(userId: any, data: ExtendedUserDTO) : Promise<{user: ExtendedUserDTO, url: string}> {
     let url = ''
     if(data.profilePicture){
       try{

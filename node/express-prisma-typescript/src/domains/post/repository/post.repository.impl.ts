@@ -1,12 +1,11 @@
-import { PrismaClient, Prisma, Post, ReactionType, $Enums } from '@prisma/client'
+import { PrismaClient, ReactionType } from '@prisma/client'
 
 
 import { CursorPagination } from '@types'
 
 import { PostRepository } from '.'
 import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto'
-import { reactionRouter } from '@domains/reaction'
-import { ExtendedUserDTO } from '@domains/user/dto'
+import { ExtendedUserDTO, UserViewDTO } from '@domains/user/dto'
 
 export class PostRepositoryImpl implements PostRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -49,7 +48,7 @@ export class PostRepositoryImpl implements PostRepository {
     
     return posts.map(post => new ExtendedPostDTO({
       ...post,
-      author: new ExtendedUserDTO(post.author),
+      author: new UserViewDTO(post.author),
       qtyComments: post._count.comments,
       qtyLikes: post.reactions.filter(reaction => reaction.reaction == ReactionType.LIKE).length,
       qtyRetweets: post.reactions.filter(reaction => reaction.reaction == ReactionType.RETWEET).length

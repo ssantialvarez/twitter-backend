@@ -5,12 +5,18 @@ import cors from 'cors'
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
 
-import { Constants, NodeEnv, Logger } from '@utils'
+import { createServer } from 'http'
+import { Server } from 'socket.io'
+import { Constants, NodeEnv, Logger, setupIO } from '@utils'
 import { router } from '@router'
 import { ErrorHandling } from '@utils/errors'
+const { join } = require('node:path');
 
 const app = express()
-
+const server = createServer(app)
+const io = new Server(server, {
+  cors: { origin: '*', methods: ['GET', 'POST'] },
+})
 
 const options = {
   definition: {
@@ -29,8 +35,6 @@ const options = {
   },
   apis: ["./src/router/index.ts"],
 };
-
-
 
 // Set up request logger
 if (Constants.NODE_ENV === NodeEnv.DEV) {
@@ -53,6 +57,10 @@ app.use('/api', router)
 
 app.use(ErrorHandling)
 
+app.get('/', (req, res) => {
+  res.sendFile(join(__dirname, 'index.html'));
+});
+
 const specs = swaggerJSDoc(options);
 app.use(
   "/api-docs",
@@ -60,6 +68,9 @@ app.use(
   swaggerUi.setup(specs)
 );
 
-app.listen(Constants.PORT, () => {
+setupIO(server)
+
+server.listen(Constants.PORT, () => {
   Logger.info(`Server listening on port ${Constants.PORT}`)
 })
+

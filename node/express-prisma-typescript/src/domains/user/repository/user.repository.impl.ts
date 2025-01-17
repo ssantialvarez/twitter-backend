@@ -69,13 +69,13 @@ export class UserRepositoryImpl implements UserRepository {
     return isPublic.public;
   }
 
-  async update (userId: string, data: ExtendedUserDTO): Promise<UserViewDTO>{
+  async update (userId: string, data: ExtendedUserDTO): Promise<ExtendedUserDTO>{
     return await this.db.user.update({
       where:{
         id: userId
       },
       data: data
-    })
+    }).then(user => new ExtendedUserDTO(user))
   }
 
 
