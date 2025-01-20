@@ -1,6 +1,7 @@
 import { FollowerRepository } from '../repository'
 import { FollowerService } from '.'
 import { ConflictException } from '@utils'
+import { UserViewDTO } from '@domains/user/dto';
 
 
 export class FollowerServiceImpl implements FollowerService {
@@ -15,5 +16,20 @@ export class FollowerServiceImpl implements FollowerService {
   async unfollowUser (followerId: string, followedId: string): Promise<void> {
     
     return this.repository.unfollow(followerId,followedId);
+  }
+
+  async isFollowing (followerId: string, followedId: string): Promise<Boolean> {
+    
+    return this.repository.isFollowing(followerId,followedId);
+  }
+
+  async getFollowersById (followedId: string): Promise<UserViewDTO[]> {
+    
+    return this.repository.getFollowers(followedId);
+  }
+
+  async getFollowedById (followerId: string): Promise<UserViewDTO[]> {
+    
+    return this.repository.getFollowed(followerId);
   }
 }

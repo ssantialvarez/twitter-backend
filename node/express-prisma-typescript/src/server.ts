@@ -6,17 +6,16 @@ import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
 
 import { createServer } from 'http'
-import { Server } from 'socket.io'
-import { Constants, NodeEnv, Logger, setupIO } from '@utils'
+
+import { Constants, NodeEnv, Logger, setupIO, withAuth } from '@utils'
 import { router } from '@router'
 import { ErrorHandling } from '@utils/errors'
+import path from 'path'
 const { join } = require('node:path');
+
 
 const app = express()
 const server = createServer(app)
-const io = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] },
-})
 
 const options = {
   definition: {
@@ -53,12 +52,20 @@ app.use(
   })
 )
 
+
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+
 app.use('/api', router)
 
 app.use(ErrorHandling)
 
 app.get('/', (req, res) => {
-  res.sendFile(join(__dirname, 'index.html'));
+  res.sendFile(join(__dirname,'..','frontend','pages','index.html'));
+});
+
+app.get("/chat", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/pages/chat.html"));
 });
 
 const specs = swaggerJSDoc(options);

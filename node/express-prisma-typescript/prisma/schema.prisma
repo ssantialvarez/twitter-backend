@@ -34,6 +34,8 @@ model User {
   posts     Post[]
   follows   Follow[]   @relation(name: "follows")
   followers Follow[]   @relation(name: "followers")
+  sentMessages   Message[]   @relation(name: "sentMessages")
+  receivedMessages Message[]   @relation(name: "receivedMessages")
   reactions Reaction[]
 }
 
@@ -71,6 +73,20 @@ model Post {
   reactions Reaction[]
 
   @@id([id, authorId])
+}
+
+model Message {
+  id         String @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  senderId   String @db.Uuid()
+  receiverId String @db.Uuid()
+
+  content   String
+  createdAt DateTime  @default(now())
+
+  sender User @relation(name: "sentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation(name: "receivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@id([id, senderId, receiverId])
 }
 
 model Reaction {

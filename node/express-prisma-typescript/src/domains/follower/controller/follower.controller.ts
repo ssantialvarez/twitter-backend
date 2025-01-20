@@ -29,3 +29,21 @@ followerRouter.post('/unfollow/:userId', async (req: Request, res: Response) => 
   
   return res.sendStatus(HttpStatus.OK)
 })
+
+followerRouter.get('/followers', async (req: Request, res: Response) => {
+  const { userId: followedId } = res.locals.context
+
+  
+  const users = await service.getFollowersById(followedId)
+  
+  return res.status(HttpStatus.OK).json(users)
+})
+
+followerRouter.get('/followed', async (req: Request, res: Response) => {
+  const { userId: followerId } = res.locals.context
+
+  
+  const users = await service.getFollowedById(followerId)
+  
+  return res.status(HttpStatus.OK).json(users)
+})

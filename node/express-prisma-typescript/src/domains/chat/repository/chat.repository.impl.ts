@@ -3,26 +3,32 @@ import { ChatRepository } from './chat.repository';
 import { MessageDTO } from '../dto';
 import {v4 as uuidv4} from 'uuid';
 
+
 export class ChatRepositoryImpl implements ChatRepository {
   constructor (private readonly db: PrismaClient) {}
-  async create (senderId: string, receiverId: string ,body: string): Promise<MessageDTO> {
-    const roomId = await this.db.message.findFirst({
-      select:{
-        roomId: true
-      },
-      where:{
-        receiverId,
-        senderId
-      }
-    })
+  async create (senderId: string, receiverId: string, content: string): Promise<MessageDTO> {
+    
     const message = await this.db.message.create({
       data: {
-        content: body,
-        roomId: roomId?.roomId ?? uuidv4(),
         senderId,
-        receiverId
+        receiverId,
+        content
       }
     })
     return new MessageDTO(message)
+  }
+
+
+  async getChat (senderId: string, receiverId: string): Promise<MessageDTO[]> {
+    
+    const messages = await this.db.message.findMany({
+      where:{
+        OR:[{receiverId: senderId, senderId: receiverId},
+          {receiverId: receiverId, senderId: senderId},
+        ]
+      }
+    })
+    
+    return messages.map((mess) => new MessageDTO(mess))
   }
 }
