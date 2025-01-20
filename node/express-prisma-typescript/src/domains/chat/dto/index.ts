@@ -6,7 +6,6 @@ export class MessageDTO {
       this.senderId = chat.senderId
       this.receiverId = chat.receiverId
       this.content = chat.content
-      this.roomId = chat.roomId
       this.createdAt = chat.createdAt
     }
   
@@ -14,7 +13,6 @@ export class MessageDTO {
     senderId: string
     receiverId: string
     content: string
-    roomId: string
     createdAt: Date
   }
   

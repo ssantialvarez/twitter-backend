@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { FollowerRepository } from './follower.repository'
 import { FollowDTO } from '../dto'
+import { UserViewDTO } from '@domains/user/dto'
 
 
 export class FollowerRepositoryImpl implements FollowerRepository {
@@ -37,6 +38,34 @@ export class FollowerRepositoryImpl implements FollowerRepository {
       }
     })
     
+  }
+
+  async getFollowers (followedId: string): Promise<UserViewDTO[]> {
+    
+    
+    const users = await this.db.follow.findMany({
+      select:{
+        follower:true
+      },
+      where : {
+        followedId
+      }
+    })
+    return users.map(user => new UserViewDTO(user.follower))
+  }
+
+  async getFollowed (followerId: string): Promise<UserViewDTO[]> {
+    
+    
+    const users = await this.db.follow.findMany({
+      select:{
+        followed:true
+      },
+      where : {
+        followerId
+      }
+    })
+    return users.map(user => new UserViewDTO(user.followed))
   }
 
   async isFollowing (followerId: string, followedId: string): Promise<Boolean>{
