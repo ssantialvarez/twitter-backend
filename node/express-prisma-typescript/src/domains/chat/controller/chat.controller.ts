@@ -14,7 +14,6 @@ export const chatRouter = Router()
 const service: ChatService = new ChatServiceImpl(new ChatRepositoryImpl(db))
 
 
-
 chatRouter.get('/:userId', async (req: Request, res: Response) => {
   const { userId: senderId } = res.locals.context
   const { userId: receiverId } = req.params
@@ -22,13 +21,4 @@ chatRouter.get('/:userId', async (req: Request, res: Response) => {
   const messages = await service.getChatByUserId(senderId,receiverId)
   
   return res.status(HttpStatus.OK).json(messages)
-})
-
-chatRouter.delete('/:postId', async (req: Request, res: Response) => {
-  const { userId } = res.locals.context
-  const { postId } = req.params
-
-  
-
-  return res.status(HttpStatus.OK).send(`Deleted post ${postId}`)
 })
