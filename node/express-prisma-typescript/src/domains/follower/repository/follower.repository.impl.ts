@@ -28,7 +28,6 @@ export class FollowerRepositoryImpl implements FollowerRepository {
   async unfollow (followerId: string, followedId: string): Promise<void> {
     const data = { followedId: followedId, followerId: followerId }
     
-    
     await this.db.follow.update({
       where : {
         followedId_followerId: data
@@ -48,7 +47,12 @@ export class FollowerRepositoryImpl implements FollowerRepository {
         follower:true
       },
       where : {
-        followedId
+        AND: [
+          {
+            followedId,
+            deletedAt: null
+          }
+        ]
       }
     })
     return users.map(user => new UserViewDTO(user.follower))
@@ -62,7 +66,12 @@ export class FollowerRepositoryImpl implements FollowerRepository {
         followed:true
       },
       where : {
-        followerId
+        AND: [
+          {
+            followerId,
+            deletedAt: null
+          }
+        ]
       }
     })
     return users.map(user => new UserViewDTO(user.followed))

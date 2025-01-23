@@ -4,18 +4,14 @@ import { ReactionDTO } from '../dto';
 
 export class ReactionRepositoryImpl implements ReactionRepository {
   constructor (private readonly db: PrismaClient) {}
-  async insert(userId: string, postId: string, reaction: ReactionType): Promise<void>{
-    try{
-      await this.db.reaction.create({
-        data:{
-          userId: userId,
-          postId: postId,
-          reaction: reaction
-        }
-      })
-    }catch(e){
-
-    }
+  async insert(userId: string, postId: string, reaction: ReactionType): Promise<ReactionDTO>{
+    return await this.db.reaction.create({
+      data:{
+        userId: userId,
+        postId: postId,
+        reaction: reaction
+      }
+    }).then(reaction => new ReactionDTO(reaction))
     
   }
 

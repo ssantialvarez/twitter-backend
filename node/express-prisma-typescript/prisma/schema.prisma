@@ -45,7 +45,7 @@ model Follow {
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  deletedAt DateTime? // Optional value
+  deletedAt DateTime? 
 
   follower User @relation(name: "follows", fields: [followerId], references: [id], onDelete: Cascade)
   followed User @relation(name: "followers", fields: [followedId], references: [id], onDelete: Cascade)
@@ -64,7 +64,7 @@ model Post {
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  deletedAt DateTime? // Optional value
+  deletedAt DateTime? 
 
   author      User    @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
   parentPost  Post?   @relation("ParentPostComment", fields: [parentPostId], references: [id])
@@ -96,9 +96,7 @@ model Reaction {
   reaction ReactionType
 
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime? // Optional value
-
+  
   user User @relation(fields: [userId], references: [id], onDelete: Cascade) // One to many
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 

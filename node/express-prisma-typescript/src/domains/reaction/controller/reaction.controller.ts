@@ -20,10 +20,10 @@ const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryI
 reactionRouter.post('/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { postId } = req.params
-  
-  await service.insertReaction(userId,postId,req.query.reaction as ReactionType)
+  //agregar info de la reaccion
+  const reaction = await service.insertReaction(userId,postId,req.query.reaction as ReactionType)
 
-  return res.sendStatus(HttpStatus.OK)
+  return res.status(HttpStatus.OK).json(reaction)
 })
 
 reactionRouter.delete('/:postId', async (req: Request, res: Response) => {

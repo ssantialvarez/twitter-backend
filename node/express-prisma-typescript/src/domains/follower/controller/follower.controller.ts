@@ -9,7 +9,6 @@ import { FollowerService, FollowerServiceImpl } from '../service'
 
 export const followerRouter = Router()
 
-// Use dependency injection
 const service: FollowerService = new FollowerServiceImpl(new FollowerRepositoryImpl(db))
 
 followerRouter.post('/follow/:userId', async (req: Request, res: Response) => {

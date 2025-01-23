@@ -1,29 +1,23 @@
 import { ReactionType } from "@prisma/client";
 import { ReactionRepository } from "../repository";
 import { ReactionService } from "./reaction.service";
-import { ForbiddenException } from "@utils";
+import { BadRequestException, ForbiddenException } from "@utils";
 import { ReactionDTO } from "../dto";
 
 export class ReactionServiceImpl implements ReactionService {
   constructor (private readonly repository: ReactionRepository) {}
   
 
-  async insertReaction (userId: any, postId: any, reaction: ReactionType): Promise<void>{
-    if(ReactionType.LIKE == reaction || ReactionType.RETWEET == reaction)
-      await this.repository.insert(userId,postId,reaction)
-    else
-      throw new ForbiddenException()
-    
+  async insertReaction (userId: any, postId: any, reaction: ReactionType): Promise<ReactionDTO>{
+    if(ReactionType.LIKE != reaction && ReactionType.RETWEET != reaction)
+      throw new BadRequestException()
+    return await this.repository.insert(userId,postId,reaction)
   }
 
   async getReactionByUserId (userId: any, reaction: ReactionType): Promise<ReactionDTO[]>{
-    
-    if(ReactionType.LIKE == reaction || ReactionType.RETWEET == reaction)
-      return await this.repository.getReactionByUserId(userId,reaction)
-    else
-      throw new ForbiddenException()
-    
-    
+    if(ReactionType.LIKE != reaction && ReactionType.RETWEET != reaction)
+      throw new BadRequestException()
+    return await this.repository.getReactionByUserId(userId,reaction)
   }
 
   async deleteReaction (userId: any, postId: any, reaction: ReactionType): Promise<void>{

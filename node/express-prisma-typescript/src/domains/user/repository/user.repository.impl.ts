@@ -16,16 +16,20 @@ export class UserRepositoryImpl implements UserRepository {
   async getById (userId: any): Promise<ExtendedUserDTO | null> {
     const user = await this.db.user.findUnique({
       where: {
-        id: userId
+        id: userId,
+        deletedAt: null
       }
     })
     return user ? new ExtendedUserDTO(user) : null
   }
 
   async delete (userId: any): Promise<void> {
-    await this.db.user.delete({
+    await this.db.user.update({
       where: {
         id: userId
+      },
+      data: {
+        deletedAt: new Date()
       }
     })
   }
@@ -34,6 +38,7 @@ export class UserRepositoryImpl implements UserRepository {
     const users = await this.db.user.findMany({
       take: options.limit ? options.limit : undefined,
       skip: options.skip ? options.skip : undefined,
+      where: { deletedAt: null },
       orderBy: [
         {
           id: 'asc'
@@ -45,23 +50,32 @@ export class UserRepositoryImpl implements UserRepository {
 
   async getByEmailOrUsername (email?: string, username?: string): Promise<ExtendedUserDTO | null> {
     const user = await this.db.user.findFirst({
-      where: {
-        OR: [
+      where: { AND: [
+        {OR: [
           {
             email
           },
           {
             username
           }
-        ]
+        ],
+        deletedAt: null 
+      }]
       }
     })
     return user ? new ExtendedUserDTO(user) : null
   }
 
   async isPublic (userId: string): Promise<Boolean> {
-    const isPublic =  await this.db.user.findUniqueOrThrow({
-      where: { id: userId },
+    const isPublic =  await this.db.user.findFirstOrThrow({
+      where: {
+        AND:[
+          {
+            deletedAt: null,
+            id: userId
+          }        
+        ]
+      },
       select: { public: true }
     })
 
@@ -83,9 +97,13 @@ export class UserRepositoryImpl implements UserRepository {
 
     const users = await this.db.user.findMany({
       where:{
-        username:{
-          contains:username
-        }
+        AND: [
+          {username:{
+            contains:username
+          },
+          deletedAt: null
+          }
+        ]
       },
       cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,

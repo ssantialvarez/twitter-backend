@@ -27,8 +27,11 @@ export class CommentRepositoryImpl implements CommentRepository {
   async getByUserId(authorId: string): Promise<PostDTO[]>{
     const comments = await this.db.post.findMany({
       where:{
-        authorId: authorId,
-        parentPostId: {not: null}
+        AND: [
+          {authorId: authorId,
+          parentPostId: {not: null},
+          deletedAt: null}
+        ]
       }
     })
 
@@ -45,7 +48,12 @@ export class CommentRepositoryImpl implements CommentRepository {
         _count: {select: {comments: true}}
       },
       where:{
-        parentPostId: postId
+        AND: [
+          {
+          parentPostId: postId,
+          deletedAt: null
+          }
+        ]
       },
       cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,

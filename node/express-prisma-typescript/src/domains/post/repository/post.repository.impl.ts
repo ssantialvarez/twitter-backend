@@ -31,7 +31,8 @@ export class PostRepositoryImpl implements PostRepository {
         author:{
           followers:{some:{followerId: userId}}
         },
-        parentPostId: null
+        parentPostId: null,
+        deletedAt: null
       },
       cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
@@ -56,9 +57,12 @@ export class PostRepositoryImpl implements PostRepository {
     }
 
   async delete (postId: string): Promise<void> {
-    await this.db.post.delete({
+    await this.db.post.update({
       where: {
         id: postId
+      },
+      data: {
+        deletedAt: new Date()
       }
     })
   }
@@ -66,7 +70,8 @@ export class PostRepositoryImpl implements PostRepository {
   async getById (postId: string): Promise<PostDTO | null> {
     const post = await this.db.post.findUnique({
       where: {
-        id: postId
+        id: postId,
+        deletedAt: null
       }
     })
     return (post != null) ? new PostDTO(post) : null
@@ -81,7 +86,8 @@ export class PostRepositoryImpl implements PostRepository {
         _count: {select: {comments: true}}
       },
       where: {
-        authorId
+        authorId,
+        deletedAt: null
       }
     })
 

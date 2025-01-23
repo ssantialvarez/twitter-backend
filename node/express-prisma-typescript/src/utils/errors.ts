@@ -42,6 +42,12 @@ export class ConflictException extends HttpException {
   }
 }
 
+export class BadRequestException extends HttpException {
+  constructor () {
+    super(HttpStatus.BAD_REQUEST, 'Bad Request. Malformed request syntax, invalid request message framing, or deceptive request routing.')
+  }
+}
+
 export function ErrorHandling (error: Error, req: Request, res: Response, next: NextFunction): Response {
   if (!error) next(error) // TODO How should I fix EsLint here?
   if (error instanceof HttpException) {
