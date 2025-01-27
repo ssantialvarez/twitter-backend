@@ -25,7 +25,7 @@ jobs:
           node-version: 18
 
       - name: "install npm@latest"
-        run: npm i -g npm@latest
+        run: npm i -g npm@10.8.2
 
       - name: "install dependencies"
         uses: bahmutov/npm-install@v1
