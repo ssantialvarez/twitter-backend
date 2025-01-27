@@ -1,10 +1,10 @@
 import { NotFoundException } from '@utils/errors'
-import { CursorPagination, OffsetPagination } from 'types'
-import { UserViewDTO, ExtendedUserDTO } from '../dto'
+import { OffsetPagination } from 'types'
+import { UserViewDTO, ExtendedUserDTO, UpdateInputDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
 import { FollowerRepository } from '@domains/follower/repository'
-import { generatePresignedUrl } from '@utils'
+import { generateKeyImage, generatePresignedUrl } from '@utils'
 import {v4 as uuidv4} from 'uuid';
 
 
@@ -30,30 +30,21 @@ export class UserServiceImpl implements UserService {
   }
 
   async checkFollow (followerId: string, followedId: string): Promise<Boolean> {
-    
-
     return await this.followerRepository.isFollowing(followerId, followedId);
   }
 
 
-  async getUsersByUsername (username: string, options: CursorPagination): Promise<UserViewDTO[]>{
-    
-
+  async getUsersByUsername (username: string, options: OffsetPagination): Promise<UserViewDTO[]>{
     return await this.repository.getByUsername(username,options)
   }
 
-  async updateUser(userId: any, data: ExtendedUserDTO) : Promise<{user: ExtendedUserDTO, url: string}> {
+  async updateUser(userId: any, data: UpdateInputDTO) : Promise<{user: ExtendedUserDTO, url: string}> {
     let url = ''
     if(data.profilePicture){
       try{
-        let image = data.profilePicture
-        let arr = image.split('.')
-        let imageName = arr.at(0) as string
-        imageName = imageName.concat("__"+uuidv4())
-        image = imageName.concat('.'+arr.at(1))
-        data.profilePicture = image
+        data.profilePicture = await generateKeyImage(data.profilePicture)
 
-        url = await generatePresignedUrl({key: image})
+        url = await generatePresignedUrl({key: data.profilePicture})
       } catch(error){
         console.log(error)
       }

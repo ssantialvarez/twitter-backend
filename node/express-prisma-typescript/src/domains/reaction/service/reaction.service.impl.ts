@@ -1,13 +1,12 @@
 import { ReactionType } from "@prisma/client";
 import { ReactionRepository } from "../repository";
 import { ReactionService } from "./reaction.service";
-import { BadRequestException, ForbiddenException } from "@utils";
+import { BadRequestException } from "@utils";
 import { ReactionDTO } from "../dto";
 
 export class ReactionServiceImpl implements ReactionService {
   constructor (private readonly repository: ReactionRepository) {}
   
-
   async insertReaction (userId: any, postId: any, reaction: ReactionType): Promise<ReactionDTO>{
     if(ReactionType.LIKE != reaction && ReactionType.RETWEET != reaction)
       throw new BadRequestException()
@@ -21,8 +20,6 @@ export class ReactionServiceImpl implements ReactionService {
   }
 
   async deleteReaction (userId: any, postId: any, reaction: ReactionType): Promise<void>{
-    
     await this.repository.delete(userId,postId,reaction)
   }
-  
 }

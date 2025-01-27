@@ -2,12 +2,10 @@ import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto'
 import { PostRepository } from '../repository'
 import { PostService } from '.'
 import { validate } from 'class-validator'
-import { deleteObjectByKey, ForbiddenException, generatePresignedUrl, NotFoundException } from '@utils'
+import { deleteObjectByKey, ForbiddenException, generateKeyImage, generatePresignedUrl, NotFoundException } from '@utils'
 import { CursorPagination } from '@types'
 import { FollowerRepository } from '@domains/follower/repository'
 import { UserRepository } from '@domains/user/repository'
-import {v4 as uuidv4} from 'uuid';
-
 
 export class PostServiceImpl implements PostService {
   constructor (
@@ -21,16 +19,10 @@ export class PostServiceImpl implements PostService {
     urls = []
 
     if(data.images){
-      for(let i = 0; i < data.images.length; i++){
-        let image = data.images.pop() as string
-        let arr = image.split('.')
-        let imageName = arr.at(0) as string
-        imageName = imageName.concat("__"+uuidv4())
-        image = imageName.concat('.'+arr.at(1))
-        data.images.unshift(image)
-        
+      for(let image of data.images){
+        image = await generateKeyImage(image)
         const presignedUrl = await generatePresignedUrl({key: image})
-        urls.unshift(presignedUrl)
+        urls.push(presignedUrl)
       }
     }
     const post = await this.repository.create(userId, data)
@@ -52,9 +44,8 @@ export class PostServiceImpl implements PostService {
 
   async getPost (userId: string, postId: string): Promise<PostDTO> {
     const post = await this.repository.getById(postId)
-    if (!post) throw new NotFoundException('post')
+    if (!post || !await this.validatesPostView(userId,post.authorId)) throw new NotFoundException('post')
 
-    this.validatesPostView(userId,post.authorId)
     return post
   }
 
@@ -63,17 +54,14 @@ export class PostServiceImpl implements PostService {
   }
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<ExtendedPostDTO[]> {
-    
-    this.validatesPostView(userId,authorId)
+    if(!await this.validatesPostView(userId,authorId)) throw new NotFoundException('post')
+      
     return await this.repository.getByAuthorId(authorId) 
   }
 
-  private async validatesPostView(userId: string, authorId: string) {
+  private async validatesPostView(userId: string, authorId: string): Promise<Boolean> {
     const isPublic = await this.userRepository.isPublic(authorId)
-    const isFollowing = await this.followRepository.isFollowing(userId,authorId)
 
-    if(!(isPublic || isFollowing))
-      throw new NotFoundException("Post")
+    return (isPublic) ? isPublic : await this.followRepository.isFollowing(userId,authorId)
   }  
-
 }

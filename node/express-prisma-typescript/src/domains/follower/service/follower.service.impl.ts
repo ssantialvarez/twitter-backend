@@ -2,11 +2,12 @@ import { FollowerRepository } from '../repository'
 import { FollowerService } from '.'
 import { ConflictException } from '@utils'
 import { UserViewDTO } from '@domains/user/dto';
+import { FollowDTO } from '../dto';
 
 
 export class FollowerServiceImpl implements FollowerService {
   constructor (private readonly repository: FollowerRepository) {}
-  async followUser (followerId: string, followedId: string): Promise<void> {    
+  async followUser (followerId: string, followedId: string): Promise<FollowDTO> {    
     if(followedId == followerId)
       throw new ConflictException("User cannot follow himself.")
     return this.repository.follow(followerId,followedId);

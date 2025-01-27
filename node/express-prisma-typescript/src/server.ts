@@ -55,7 +55,6 @@ app.use(
 
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-
 app.use('/api', router)
 
 app.use(ErrorHandling)
@@ -81,3 +80,4 @@ server.listen(Constants.PORT, () => {
   Logger.info(`Server listening on port ${Constants.PORT}`)
 })
 
+export default app

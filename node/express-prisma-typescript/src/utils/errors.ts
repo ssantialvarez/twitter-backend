@@ -48,6 +48,12 @@ export class BadRequestException extends HttpException {
   }
 }
 
+export class InternalServerErrorException extends HttpException {
+  constructor () {
+    super(HttpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error. the server encountered an unexpected condition that prevented it from fulfilling the request..')
+  }
+}
+
 export function ErrorHandling (error: Error, req: Request, res: Response, next: NextFunction): Response {
   if (!error) next(error) // TODO How should I fix EsLint here?
   if (error instanceof HttpException) {

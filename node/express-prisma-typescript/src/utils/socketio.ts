@@ -2,11 +2,10 @@ import { ChatRepositoryImpl } from '@domains/chat/repository'
 import { ChatService, ChatServiceImpl } from '@domains/chat/service'
 import { FollowerRepositoryImpl } from '@domains/follower/repository'
 import { FollowerService, FollowerServiceImpl } from '@domains/follower/service'
-import { ConflictException, db } from '@utils'
+import { db, InternalServerErrorException } from '@utils'
 import { Server as httpServer } from 'http'
-import { send } from 'process'
 import { Server } from 'socket.io'
-import { threadId } from 'worker_threads'
+
 
 const followerService: FollowerService = new FollowerServiceImpl(new FollowerRepositoryImpl(db))
 const chatService: ChatService = new ChatServiceImpl(new ChatRepositoryImpl(db))
@@ -37,7 +36,7 @@ export const setupIO = (server: httpServer) => {
           const message = await chatService.createMessage(senderId,receiverId,msg)
           io.to(senderId + "_" + receiverId).emit('chat message', msg, message.createdAt);
         }catch(e){
-          throw new ConflictException()
+          throw new InternalServerErrorException()
         }
         
       }

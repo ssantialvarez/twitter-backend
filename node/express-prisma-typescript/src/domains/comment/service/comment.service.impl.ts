@@ -5,7 +5,7 @@ import { CommentRepository } from '../repository'
 import { FollowerRepository } from '@domains/follower/repository'
 import { UserRepository } from '@domains/user/repository'
 import { PostRepository } from '@domains/post/repository'
-import { NotFoundException } from '@utils'
+import { generateKeyImage, generatePresignedUrl, NotFoundException } from '@utils'
 import { validate } from 'class-validator'
 
 export class CommentServiceImpl implements CommentService {
@@ -16,19 +16,31 @@ export class CommentServiceImpl implements CommentService {
     private readonly postRepository: PostRepository
     ) {}
 
-  async createComment (userId: string, postId: string, data: CreatePostInputDTO): Promise<PostDTO> {
+  async createComment (userId: string, postId: string, data: CreatePostInputDTO): Promise<{comment: PostDTO, urls: string[]}> {
     const parentPost = await this.postRepository.getById(postId)
-    if(parentPost == null)
+    if(!parentPost)
       throw new NotFoundException('post')
 
     const authorIsPublic = await this.userRepository.isPublic(parentPost.authorId)
-    const follows = await this.followerRepository.isFollowing(userId,parentPost.authorId)
-    
-    if(!(authorIsPublic || follows))
+
+    if(!authorIsPublic && !(await this.followerRepository.isFollowing(userId,parentPost.authorId)))
       throw new NotFoundException('post')
 
     await validate(data)
-    return await this.repository.create(userId, postId, data)
+
+    let urls: string[]
+    urls = []
+    
+    if(data.images){
+      for(let image of data.images){
+        image = await generateKeyImage(image)
+        const presignedUrl = await generatePresignedUrl({key: image})
+        urls.push(presignedUrl)
+      }
+    }
+
+    const comment = await this.repository.create(userId, postId, data)
+    return {comment,urls}
   }
 
   async getCommentsByUser (authorId: string, userId: string): Promise<PostDTO[]>{
@@ -43,4 +55,5 @@ export class CommentServiceImpl implements CommentService {
     return comments
   
   }
+
 }

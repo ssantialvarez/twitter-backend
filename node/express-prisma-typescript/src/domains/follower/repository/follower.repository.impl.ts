@@ -6,8 +6,8 @@ import { UserViewDTO } from '@domains/user/dto'
 
 export class FollowerRepositoryImpl implements FollowerRepository {
   constructor (private readonly db: PrismaClient) {}
-  async follow (followerId: string, followedId: string): Promise<void> {
-    await this.db.follow.upsert({
+  async follow (followerId: string, followedId: string): Promise<FollowDTO> {
+    return await this.db.follow.upsert({
       where: {
         followedId_followerId: {
           followedId,
@@ -20,9 +20,8 @@ export class FollowerRepositoryImpl implements FollowerRepository {
       create: {
         followedId: followedId,
         followerId: followerId
-      },
-
-    })
+      }
+    }).then(follow => new FollowDTO(follow))
   }
 
   async unfollow (followerId: string, followedId: string): Promise<void> {

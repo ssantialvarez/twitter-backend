@@ -8,20 +8,17 @@ import { ReactionRepositoryImpl } from '../repository'
 import { ReactionService, ReactionServiceImpl } from '../service'
 import { ReactionType } from '@prisma/client'
 
-
-
 export const reactionRouter = Router()
 
-// Use dependency injection
 const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryImpl(db))
-
-
 
 reactionRouter.post('/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { postId } = req.params
+  let requestedReaction  = req.query.reaction as string
+  requestedReaction = requestedReaction.toLocaleUpperCase()
   //agregar info de la reaccion
-  const reaction = await service.insertReaction(userId,postId,req.query.reaction as ReactionType)
+  const reaction = await service.insertReaction(userId,postId,requestedReaction as ReactionType)
 
   return res.status(HttpStatus.OK).json(reaction)
 })

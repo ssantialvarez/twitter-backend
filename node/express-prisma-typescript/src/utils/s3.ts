@@ -1,5 +1,6 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, DeleteObjectCommandOutput } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import {v4 as uuidv4} from 'uuid';
 
 type PresignedUrlParams = {
   key: string;
@@ -37,4 +38,11 @@ export const deleteObjectByKey = async (key: string): Promise<DeleteObjectComman
     console.error("Error deleting object:", error);
     throw new Error("Failed to delete object");
   }
+}
+
+export const generateKeyImage = async (image: string): Promise<string> => {
+  let arr = image.split('.')
+  let imageName = arr.at(0) as string
+  
+  return imageName.concat("__"+uuidv4()+'.'+arr.at(1))
 }

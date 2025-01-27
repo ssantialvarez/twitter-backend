@@ -1,7 +1,7 @@
 import { UserViewDTO } from "@domains/user/dto"
 import { FollowDTO } from "../dto"
 export interface FollowerRepository {
-    follow: (followerId: string, followedId: string) => Promise<void>
+    follow: (followerId: string, followedId: string) => Promise<FollowDTO>
     unfollow: (followerId: string, followedId: string) => Promise<void>
 
     getFollowers: (followedId: string) => Promise<UserViewDTO[]>
