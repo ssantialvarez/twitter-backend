@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: node/express.prisma.typescript
+        working-directory: node/express-prisma-typescript
     timeout-minutes: 10
     steps:
       - name: "checkout repository"
