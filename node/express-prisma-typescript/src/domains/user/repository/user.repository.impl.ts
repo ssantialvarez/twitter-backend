@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { CursorPagination, OffsetPagination } from '@types'
 import { ExtendedUserDTO, UpdateInputDTO, UserDTO, UserViewDTO } from '../dto'
 import { UserRepository } from './user.repository'
+import { InternalServerErrorException } from '@utils'
 
 export class UserRepositoryImpl implements UserRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -23,22 +24,49 @@ export class UserRepositoryImpl implements UserRepository {
     return user ? new ExtendedUserDTO(user) : null
   }
 
-  async delete (userId: any): Promise<void> {
-    await this.db.user.update({
-      where: {
-        id: userId
-      },
-      data: {
-        deletedAt: new Date()
-      }
-    })
+  async delete (userId: string): Promise<void> {
+    try{
+      await this.db.user.update({
+        where: {
+          id: userId,
+          deletedAt: null
+        },
+        data: {
+          deletedAt: new Date()
+        }
+      })
+      await this.db.post.updateMany({
+        where: {
+          authorId: userId,
+          deletedAt: null
+        },
+        data: {
+          deletedAt: new Date()
+        }
+      })
+    }catch(e){
+      throw new InternalServerErrorException()
+    }
   }
 
-  async getRecommendedUsersPaginated (options: OffsetPagination): Promise<ExtendedUserDTO[]> {
+  async getRecommendedUsersPaginated (userId: string,options: OffsetPagination): Promise<ExtendedUserDTO[]> {
+    const followed = await this.db.follow.findMany({
+      select: {followedId: true},
+      where: {followerId: userId}
+    })
+
+    const followedIds: string[] = followed.map(fol => fol.followedId)
+    followedIds.push(userId)
+    
     const users = await this.db.user.findMany({
+      distinct: "id",
       take: options.limit ? options.limit : undefined,
       skip: options.skip ? options.skip : undefined,
-      where: { deletedAt: null },
+      where: { 
+        deletedAt: null,
+        id: {notIn: followedIds},
+        followers: {some: {followerId: {in: followedIds}}}
+      },
       orderBy: [
         {
           id: 'asc'
@@ -67,7 +95,7 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async isPublic (userId: string): Promise<Boolean> {
-    const isPublic =  await this.db.user.findFirstOrThrow({
+    const isPublic =  await this.db.user.findFirst({
       where: {
         AND:[
           {
@@ -80,7 +108,7 @@ export class UserRepositoryImpl implements UserRepository {
     })
 
 
-    return isPublic.public;
+    return isPublic?.public ?? false;
   }
 
   async update (userId: string, data: UpdateInputDTO): Promise<ExtendedUserDTO>{

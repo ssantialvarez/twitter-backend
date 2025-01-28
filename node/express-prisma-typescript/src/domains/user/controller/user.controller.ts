@@ -57,7 +57,7 @@ userRouter.delete('/', async (req: Request, res: Response) => {
 
   await service.deleteUser(userId)
 
-  return res.sendStatus(HttpStatus.OK)
+  return res.status(HttpStatus.OK).send(`Deleted user ${userId}`)
 })
 
 userRouter.put('/', BodyValidation(UpdateInputDTO), async (req: Request, res: Response) => {

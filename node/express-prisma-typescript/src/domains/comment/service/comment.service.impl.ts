@@ -23,7 +23,7 @@ export class CommentServiceImpl implements CommentService {
 
     const authorIsPublic = await this.userRepository.isPublic(parentPost.authorId)
 
-    if(!authorIsPublic && !(await this.followerRepository.isFollowing(userId,parentPost.authorId)))
+    if(!authorIsPublic && !(await this.followerRepository.isFollowing(userId,parentPost.authorId)) && userId != parentPost.authorId)
       throw new NotFoundException('post')
 
     await validate(data)
@@ -44,16 +44,21 @@ export class CommentServiceImpl implements CommentService {
   }
 
   async getCommentsByUser (authorId: string, userId: string): Promise<PostDTO[]>{
+    if(!await this.validatesPostView(userId,authorId)) throw new NotFoundException()
 
     return await this.repository.getByUserId(authorId)
-
   }
   
   async getCommentsByPost (postId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
     const comments = await this.repository.getAllByDatePaginated(postId, options)
-    //comments.sort((a,b) => b.qtyLikes - a.qtyLikes == 0 ? (b.qtyRetweets - a.qtyRetweets == 0 ? b.qtyComments - a.qtyComments : b.qtyRetweets - a.qtyRetweets) : b.qtyLikes - a.qtyLikes)
+    comments.sort((a,b) => b.qtyLikes - a.qtyLikes == 0 ? (b.qtyRetweets - a.qtyRetweets == 0 ? b.qtyComments - a.qtyComments : b.qtyRetweets - a.qtyRetweets) : b.qtyLikes - a.qtyLikes)
     return comments
-  
+  }
+
+  private async validatesPostView(userId: string, authorId: string): Promise<Boolean> {
+    const isPublic = await this.userRepository.isPublic(authorId)
+
+    return (isPublic) ? isPublic : await this.followerRepository.isFollowing(userId,authorId)
   }
 
 }

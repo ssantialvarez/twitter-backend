@@ -10,16 +10,20 @@ type PresignedUrlParams = {
 const region = process.env.AWS_REGION as string
 const bucketName = 'twitter-backend-demo-a617f6da-58a7-4888-b927-88eaae142243'
 
-// Configura el cliente de S3
 const createS3Client = (region: string) => {
-  return new S3Client({ region });
+  return new S3Client({ 
+    region,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
+    },
+   });
 };
 
-// Genera una URL presignada para subir un archivo a S3
-export const generatePresignedUrl = async ({key, expiresIn = 3600,}: PresignedUrlParams): Promise<string> => {
+export const generatePresignedUrl = async ({key, expiresIn = 36000,}: PresignedUrlParams): Promise<string> => {
   const client = createS3Client(region);
   const command = new PutObjectCommand({ Bucket: bucketName, Key: key });
-
+  
   try {
     const presignedUrl = await getSignedUrl(client, command, { expiresIn });
     return presignedUrl;

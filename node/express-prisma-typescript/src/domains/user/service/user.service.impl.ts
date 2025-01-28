@@ -1,4 +1,4 @@
-import { NotFoundException } from '@utils/errors'
+import { InternalServerErrorException, NotFoundException } from '@utils/errors'
 import { OffsetPagination } from 'types'
 import { UserViewDTO, ExtendedUserDTO, UpdateInputDTO } from '../dto'
 import { UserRepository } from '../repository'
@@ -18,15 +18,19 @@ export class UserServiceImpl implements UserService {
   }
 
   async getUserRecommendations (userId: any, options: OffsetPagination): Promise<UserViewDTO[]> {
-    // TODO: make this return only users followed by users the original user follows
+    // returns only users followed by users the original user follows
 
-    const users = (await this.repository.getRecommendedUsersPaginated(options)).map(user => new UserViewDTO(user))
+    const users = (await this.repository.getRecommendedUsersPaginated(userId, options)).map(user => new UserViewDTO(user))
 
     return users
   }
 
   async deleteUser (userId: any): Promise<void> {
-    await this.repository.delete(userId)
+    try{
+      await this.repository.delete(userId)
+    } catch(e) {
+      throw new InternalServerErrorException()
+    }
   }
 
   async checkFollow (followerId: string, followedId: string): Promise<Boolean> {
@@ -46,7 +50,7 @@ export class UserServiceImpl implements UserService {
 
         url = await generatePresignedUrl({key: data.profilePicture})
       } catch(error){
-        console.log(error)
+        throw new InternalServerErrorException()
       }
     }
     const user = await this.repository.update(userId,data)

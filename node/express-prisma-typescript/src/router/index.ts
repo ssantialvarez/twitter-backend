@@ -272,7 +272,45 @@ router.use('/chat', withAuth, chatRouter)
  *          $ref: '#/components/responses/UnauthorizedError'
  *       500:
  *         description: Some server error 
- *
+ * /follower/followers:
+ *   get:
+ *     summary: Get a list of your followers.
+ *     tags: [User]
+ *     security: 
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: The list of users.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref:'#/components/schemas/UserView'
+ *       401:
+ *          $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         description: Some server error
+ * /follower/followed:
+ *   get:
+ *     summary: Get a list of  user you follow.
+ *     tags: [User]
+ *     security: 
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: The list of users.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref:'#/components/schemas/UserView'
+ *       401:
+ *          $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         description: Some server error 
+ * 
  * /user:
  *   get:
  *     summary: Get a list of recommended Users to follow.

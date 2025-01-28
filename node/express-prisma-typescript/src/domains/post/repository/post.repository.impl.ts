@@ -29,7 +29,11 @@ export class PostRepositoryImpl implements PostRepository {
       },
       where:{
         author:{
-          followers:{some:{followerId: userId}}
+          OR:[{
+            followers:{some:{followerId: userId}}
+          },
+          {public: true}
+          ]
         },
         parentPostId: null,
         deletedAt: null
@@ -94,7 +98,7 @@ export class PostRepositoryImpl implements PostRepository {
     
     return posts.map(post => new ExtendedPostDTO({
       ...post,
-      author: new ExtendedUserDTO(post.author),
+      author: new UserViewDTO(post.author),
       qtyComments: post._count.comments,
       qtyLikes: post.reactions.filter(reaction => reaction.reaction == ReactionType.LIKE).length,
       qtyRetweets: post.reactions.filter(reaction => reaction.reaction == ReactionType.RETWEET).length

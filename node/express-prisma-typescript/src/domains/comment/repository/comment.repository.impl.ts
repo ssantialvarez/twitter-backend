@@ -29,7 +29,6 @@ export class CommentRepositoryImpl implements CommentRepository {
       where:{
         AND: [
           {authorId: authorId,
-          parentPostId: {not: null},
           deletedAt: null}
         ]
       }
@@ -48,22 +47,11 @@ export class CommentRepositoryImpl implements CommentRepository {
         _count: {select: {comments: true}}
       },
       where:{
-        AND: [
-          {
-          parentPostId: postId,
-          deletedAt: null
-          }
-        ]
+        parentPostId: postId,
       },
       cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
-      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
-      orderBy: [
-        {
-          reactions: {_count: 'desc'}
-          
-        }
-      ]
+      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined
     })
     
     return comments.map(comment => new ExtendedPostDTO({

@@ -173,5 +173,12 @@ describe('Post Test', () => {
         expect(UserRepositoryMock.isPublic).toHaveBeenCalled()
         expect(FollowerRepositoryMock.isFollowing).toHaveBeenCalled()
     })
-  });
+  }),
+  describe('get users by username', () => { 
+    it('gets users succesfully', async () => {
+      await service.getLatestPosts('john', { limit: 5, before: 'a' })
+        
+      expect(PostRepositoryMock.getAllByDatePaginated).toHaveBeenCalledWith('john', { limit: 5, before: 'a'})
+    })  
+  })
 });

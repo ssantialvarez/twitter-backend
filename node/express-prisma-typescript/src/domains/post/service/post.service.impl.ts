@@ -21,10 +21,14 @@ export class PostServiceImpl implements PostService {
     if(data.images){
       for(let image of data.images){
         image = await generateKeyImage(image)
+        
+        data.images.shift()
+        data.images.push(image)
         const presignedUrl = await generatePresignedUrl({key: image})
         urls.push(presignedUrl)
       }
     }
+
     const post = await this.repository.create(userId, data)
 
     return {post, urls}

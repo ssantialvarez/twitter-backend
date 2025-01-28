@@ -63,5 +63,78 @@ describe('Comment Test', () => {
         expect(mockGeneratePresignedUrl).toHaveBeenCalledTimes(images.length)
         expect(mockGenerateKeyImage).toHaveBeenCalled()
     })
-  })
+  }),
+  describe('get commments by user', () => {
+    it('returns found post because author is public', async () => {    
+      const postsToBeReturned = [new PostDTO({
+        authorId: 'a',
+        content: 'tweet generico',
+        createdAt: new Date(),
+        id: '1',
+        images: ['test.jpg']
+      })]
+      CommentRepositoryMock.getByUserId.mockResolvedValue(postsToBeReturned)
+      UserRepositoryMock.isPublic.mockResolvedValue(true)
+            
+      const returnedPosts = await service.getCommentsByUser('b', 'a')
+    
+      expect(returnedPosts).toStrictEqual(postsToBeReturned)
+      expect(CommentRepositoryMock.getByUserId).toHaveBeenCalled()
+      expect(UserRepositoryMock.isPublic).toHaveBeenCalled()
+      expect(FollowerRepositoryMock.isFollowing).not.toHaveBeenCalled()
+    })
+    it('throws not found exception because author is private and requester does not follows', async () => {
+      UserRepositoryMock.isPublic.mockResolvedValue(false)
+      FollowerRepositoryMock.isFollowing.mockResolvedValue(false)
+            
+      await expect(service.getCommentsByUser('b','a')).rejects.toThrow('Not found');
+    
+      expect(CommentRepositoryMock.getByUserId).not.toHaveBeenCalled()
+      expect(UserRepositoryMock.isPublic).toHaveBeenCalled()
+      expect(FollowerRepositoryMock.isFollowing).toHaveBeenCalled()
+    })
+  }),
+  describe('get comments by post', () => { 
+      it('gets comments succesfully', async () => {
+        const author = new UserViewDTO({id:'a', name:'john doe', profilePicture: 'test.jpg', username: 'xmiliamx'})  
+        let post1 = new ExtendedPostDTO({
+          author,
+          authorId: 'a',
+          content: 'tweet generico',
+          createdAt: new Date(),
+          id: '1',
+          images: ['test.jpg'],
+          qtyComments: 0,
+          qtyLikes: 0,
+          qtyRetweets: 0
+        })
+        let post2 = new ExtendedPostDTO({
+          author,
+          authorId: 'a',
+          content: 'tweet generico 2',
+          createdAt: new Date(),
+          id: '2',
+          images: [],
+          qtyComments: 0,
+          qtyLikes: 0,
+          qtyRetweets: 0
+        })
+        let postsToBeReturned = [post1, post2]
+        CommentRepositoryMock.getAllByDatePaginated.mockResolvedValue(postsToBeReturned)
+
+        await service.getCommentsByPost('a', { limit: 5, before: 'a' })
+        post1.qtyLikes = 1
+
+        postsToBeReturned = [post1, post2]
+        CommentRepositoryMock.getAllByDatePaginated.mockResolvedValue(postsToBeReturned)
+        await service.getCommentsByPost('a', { limit: 5, before: 'a' })
+        post2.qtyLikes = 1
+        post1.qtyRetweets = 1
+        postsToBeReturned = [post1, post2]
+        CommentRepositoryMock.getAllByDatePaginated.mockResolvedValue(postsToBeReturned)
+        await service.getCommentsByPost('a', { limit: 5, before: 'a' })
+          
+        expect(CommentRepositoryMock.getAllByDatePaginated).toHaveBeenCalledWith('a', { limit: 5, before: 'a'})
+      })  
+    })
 });
