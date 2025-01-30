@@ -34,7 +34,7 @@ export class UserServiceImpl implements UserService {
   }
 
   async checkFollow (followerId: string, followedId: string): Promise<Boolean> {
-    return await this.followerRepository.isFollowing(followerId, followedId);
+    return await this.followerRepository.getFollowing(followerId, followedId);
   }
 
 

@@ -1,6 +1,6 @@
 import { SignupInputDTO } from '@domains/auth/dto'
 import { PrismaClient } from '@prisma/client'
-import { CursorPagination, OffsetPagination } from '@types'
+import { OffsetPagination } from '@types'
 import { ExtendedUserDTO, UpdateInputDTO, UserDTO, UserViewDTO } from '../dto'
 import { UserRepository } from './user.repository'
 import { InternalServerErrorException } from '@utils'
@@ -52,7 +52,7 @@ export class UserRepositoryImpl implements UserRepository {
   async getRecommendedUsersPaginated (userId: string,options: OffsetPagination): Promise<ExtendedUserDTO[]> {
     const followed = await this.db.follow.findMany({
       select: {followedId: true},
-      where: {followerId: userId}
+      where: {followerId: userId, deletedAt: null}
     })
 
     const followedIds: string[] = followed.map(fol => fol.followedId)

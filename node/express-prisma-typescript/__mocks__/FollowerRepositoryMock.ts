@@ -4,5 +4,5 @@ export const FollowerRepositoryMock = {
 
     getFollowers: jest.fn(),
     getFollowed: jest.fn(),
-    isFollowing: jest.fn()
+    getFollowing: jest.fn()
 }

@@ -25,7 +25,7 @@ export class PostRepositoryImpl implements PostRepository {
       include:{
         author: true,
         reactions: true,
-        _count: {select: {comments: true}}
+        _count: {select: {comments: {where: {deletedAt: {not: null}}}}}
       },
       where:{
         author:{
@@ -93,6 +93,7 @@ export class PostRepositoryImpl implements PostRepository {
         authorId,
         deletedAt: null
       }
+
     })
 
     

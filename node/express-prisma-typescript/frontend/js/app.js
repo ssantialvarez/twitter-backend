@@ -17,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
   
         if (response.ok) {
-            // Asumiendo que la respuesta es JSON y contiene un campo "token".
             const data = await response.json();
             const token = data.token;
         
@@ -27,8 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             localStorage.setItem("authToken", data.token);
             localStorage.setItem("actualUser", username);
-            // Redirect to a new page after successful login
-            window.location.href = "/chat"; // Replace with your target page
+            window.location.href = "/chat"; 
         } else {
           const error = await response.json();
           console.log(error)

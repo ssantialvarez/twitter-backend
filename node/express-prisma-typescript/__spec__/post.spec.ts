@@ -5,13 +5,17 @@ import { PostServiceImpl } from '../src/domains/post/service'
 import { ExtendedPostDTO, PostDTO } from '../src/domains/post/dto';
 import { UserViewDTO } from '../src/domains/user/dto';
 import { deleteObjectByKey, generateKeyImage, generatePresignedUrl } from '../src/utils/s3'
+import { validatesPostView } from '../src/utils/validation'
 
+jest.mock('../src/utils/validation', () => ({
+  validatesPostView: jest.fn()
+}))
 jest.mock('../src/utils/s3', () => ({
     deleteObjectByKey: jest.fn(),
     generatePresignedUrl: jest.fn(),
     generateKeyImage: jest.fn()
 }));
-const service = new PostServiceImpl(PostRepositoryMock,FollowerRepositoryMock,UserRepositoryMock)
+const service = new PostServiceImpl(PostRepositoryMock)
 
 
 describe('Post Test', () => {
@@ -22,48 +26,46 @@ describe('Post Test', () => {
     it('returns found post because post user follows author', async () => {
         const postToBeReturned = new PostDTO({authorId:'a',content:'tweet generico', id:'1', createdAt: new Date(), images: []})
         PostRepositoryMock.getById.mockResolvedValue(postToBeReturned)
-        UserRepositoryMock.isPublic.mockResolvedValue(false)
-        FollowerRepositoryMock.isFollowing.mockResolvedValue(true)
+        const validatesPostMock = jest.mocked(validatesPostView)
+        validatesPostMock.mockResolvedValue(true)
         
         const returnedPost = await service.getPost('b', '1')
 
         expect(returnedPost).toStrictEqual(postToBeReturned)
         expect(PostRepositoryMock.getById).toHaveBeenCalledWith('1')
-        expect(UserRepositoryMock.isPublic).toHaveBeenCalledWith('a')
-        expect(FollowerRepositoryMock.isFollowing).toHaveBeenCalled()
+        expect(validatesPostMock).toHaveBeenCalledWith('b','a')
     }),
     it('returns found post because author is public', async () => {
         const postToBeReturned = new PostDTO({authorId:'a',content:'tweet generico', id:'1', createdAt: new Date(), images: []})
         PostRepositoryMock.getById.mockResolvedValue(postToBeReturned)
-        UserRepositoryMock.isPublic.mockResolvedValue(true)
+        const validatesPostMock = jest.mocked(validatesPostView)
+        validatesPostMock.mockResolvedValue(true)
         
         const returnedPost = await service.getPost('b', '1')
 
         expect(returnedPost).toStrictEqual(postToBeReturned)
         expect(PostRepositoryMock.getById).toHaveBeenCalled()
-        expect(UserRepositoryMock.isPublic).toHaveBeenCalled()
-        expect(FollowerRepositoryMock.isFollowing).not.toHaveBeenCalled()
+        expect(validatesPostMock).toHaveBeenCalled()
     }),
     it('throws not found exception because post does not exist', async () => {
         PostRepositoryMock.getById.mockResolvedValue(null)
-  
+        const validatesPostMock = jest.mocked(validatesPostView)
+        
         await expect(service.getPost('b', '1')).rejects.toThrow('Not found');
   
         expect(PostRepositoryMock.getById).toHaveBeenCalled()
-        expect(UserRepositoryMock.isPublic).not.toHaveBeenCalled()
-        expect(FollowerRepositoryMock.isFollowing).not.toHaveBeenCalled()
+        expect(validatesPostMock).not.toHaveBeenCalled()
       }),
     it('throws not found exception because author is private and requester does not follows', async () => {
         const postToBeReturned = new PostDTO({authorId:'a',content:'tweet generico', id:'1', createdAt: new Date(), images: []})
         PostRepositoryMock.getById.mockResolvedValue(postToBeReturned)
-        UserRepositoryMock.isPublic.mockResolvedValue(false)
-        FollowerRepositoryMock.isFollowing.mockResolvedValue(false)
+        const validatesPostMock = jest.mocked(validatesPostView)
+        validatesPostMock.mockResolvedValue(false)
         
         await expect(service.getPost('b', '1')).rejects.toThrow('Not found');
 
         expect(PostRepositoryMock.getById).toHaveBeenCalled()
-        expect(UserRepositoryMock.isPublic).toHaveBeenCalled()
-        expect(FollowerRepositoryMock.isFollowing).toHaveBeenCalled()
+        expect(validatesPostMock).toHaveBeenCalled()
     })
   }),
   describe('delete post', () => {
@@ -129,15 +131,14 @@ describe('Post Test', () => {
             qtyRetweets: 0
         })]
         PostRepositoryMock.getByAuthorId.mockResolvedValue(postsToBeReturned)
-        UserRepositoryMock.isPublic.mockResolvedValue(false)
-        FollowerRepositoryMock.isFollowing.mockResolvedValue(true)
+        const validatesPostMock = jest.mocked(validatesPostView)
+        validatesPostMock.mockResolvedValue(true)
         
         const returnedPosts = await service.getPostsByAuthor('b', 'a')
 
         expect(returnedPosts).toStrictEqual(postsToBeReturned)
         expect(PostRepositoryMock.getByAuthorId).toHaveBeenCalledWith('a')
-        expect(UserRepositoryMock.isPublic).toHaveBeenCalledWith('a')
-        expect(FollowerRepositoryMock.isFollowing).toHaveBeenCalled()
+        expect(validatesPostMock).toHaveBeenCalledWith('b','a')
     }),
     it('returns found post because author is public', async () => {
       const author = new UserViewDTO({id:'a', name:'john doe', profilePicture: 'test.jpg', username: 'xmiliamx'})  
@@ -154,24 +155,23 @@ describe('Post Test', () => {
           qtyRetweets: 0
         })]
         PostRepositoryMock.getByAuthorId.mockResolvedValue(postsToBeReturned)
-        UserRepositoryMock.isPublic.mockResolvedValue(true)
+        const validatesPostMock = jest.mocked(validatesPostView)
+        validatesPostMock.mockResolvedValue(true)
         
         const returnedPosts = await service.getPostsByAuthor('b', 'a')
 
         expect(returnedPosts).toStrictEqual(postsToBeReturned)
         expect(PostRepositoryMock.getByAuthorId).toHaveBeenCalled()
-        expect(UserRepositoryMock.isPublic).toHaveBeenCalled()
-        expect(FollowerRepositoryMock.isFollowing).not.toHaveBeenCalled()
+        expect(validatesPostMock).toHaveBeenCalled()
     })
     it('throws not found exception because author is private and requester does not follows', async () => {
-        UserRepositoryMock.isPublic.mockResolvedValue(false)
-        FollowerRepositoryMock.isFollowing.mockResolvedValue(false)
-        
+        const validatesPostMock = jest.mocked(validatesPostView)
+        validatesPostMock.mockResolvedValue(false)
+      
         await expect(service.getPostsByAuthor('b','a')).rejects.toThrow('Not found');
 
         expect(PostRepositoryMock.getByAuthorId).not.toHaveBeenCalled()
-        expect(UserRepositoryMock.isPublic).toHaveBeenCalled()
-        expect(FollowerRepositoryMock.isFollowing).toHaveBeenCalled()
+        expect(validatesPostMock).toHaveBeenCalled()
     })
   }),
   describe('get users by username', () => { 

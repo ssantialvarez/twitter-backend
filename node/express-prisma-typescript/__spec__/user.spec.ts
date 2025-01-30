@@ -44,11 +44,11 @@ describe('User Test', () => {
   }),
   describe('check follow', () => {
     it('returns boolean', async () => {
-      FollowerRepositoryMock.isFollowing.mockResolvedValue(true)
+      FollowerRepositoryMock.getFollowing.mockResolvedValue(true)
 
       const returnedUser = await service.checkFollow('a','b')
 
-      expect(FollowerRepositoryMock.isFollowing).toHaveBeenCalledWith('a','b')
+      expect(FollowerRepositoryMock.getFollowing).toHaveBeenCalledWith('a','b')
       expect(returnedUser).toBe(true)
     })
   }),
@@ -119,7 +119,7 @@ describe('User Test', () => {
     it('checks if following', async () => {
       await service.checkFollow('a', 'b')
       
-      expect(FollowerRepositoryMock.isFollowing).toHaveBeenCalledWith('a', 'b')
+      expect(FollowerRepositoryMock.getFollowing).toHaveBeenCalledWith('a', 'b')
     })  
   }),
   describe('get users by username', () => { 

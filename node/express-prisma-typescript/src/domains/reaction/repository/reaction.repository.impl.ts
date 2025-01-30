@@ -26,21 +26,15 @@ export class ReactionRepositoryImpl implements ReactionRepository {
     return reactions.map(aux => new ReactionDTO(aux))
   }
 
-  async delete(userId: string, postId: string, reaction: ReactionType): Promise<void>{
-    try{
-      await this.db.reaction.delete({
-        where:{
-          userId_postId_reaction:{
-            userId,
-            postId,
-            reaction
-
-          }
+  async delete(userId: string, postId: string, reaction: ReactionType): Promise<void>{    
+    await this.db.reaction.delete({
+      where:{
+        userId_postId_reaction:{
+          userId,
+          postId,
+          reaction
         }
-      })
-    }catch(e){
-
-    }
-
+      }
+    })
   }
 }

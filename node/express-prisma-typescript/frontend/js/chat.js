@@ -19,7 +19,7 @@ const socket = io({
 
 document.addEventListener("DOMContentLoaded", async () => {    
     try {
-      let response = await fetch("http://localhost:8080/api/user", {
+      let response = await fetch("/api/user/me", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -27,16 +27,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
   
       if (response.ok) {    
-        users = await response.json()
-        for(let user of users){
-            if(actualUser == user.username){
-                actualUserId = user.id
-                
-            }
-        }
+        const user = await response.json()
+        actualUserId = user.id
       }
 
-      response = await fetch("http://localhost:8080/api/follower/followed", {
+      response = await fetch("/api/follower/followed", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -50,12 +45,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const item = document.createElement('option');
                 item.textContent = user.username;
                 usersList.appendChild(item);
-                
             }
-        }
-
-        
-        
+        }        
       } else {
         alert("Error");
         window.location.href = "/";
@@ -72,7 +63,7 @@ usersList.addEventListener('change', async (e) => {
       messages.removeChild(messages.lastChild);
     }
 
-    const response = await fetch("http://localhost:8080/api/follower/followed", {
+    const response = await fetch("/api/follower/followed", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -87,7 +78,8 @@ usersList.addEventListener('change', async (e) => {
       }
       
     }
-    
+    console.log(selectedId)
+    console.log(actualUserId)
     socket.emit('leave room', selectedId, actualUserId)
     socket.emit('join room', selectedId, actualUserId)
     socket.emit('bring room', selectedId, actualUserId)
@@ -97,7 +89,7 @@ form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8080/api/follower/followed", {
+      const response = await fetch("/api/follower/followed", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

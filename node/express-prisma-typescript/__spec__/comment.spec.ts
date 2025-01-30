@@ -30,14 +30,14 @@ describe('Comment Test', () => {
         const postToBeReturned = new PostDTO({authorId:'a',content:'tweet generico', id:'1', createdAt: new Date(), images: []})
         PostRepositoryMock.getById.mockResolvedValue(postToBeReturned)
         UserRepositoryMock.isPublic.mockResolvedValue(false)
-        FollowerRepositoryMock.isFollowing.mockResolvedValue(false)
+        FollowerRepositoryMock.getFollowing.mockResolvedValue(false)
 
 
 ,
         await expect(service.createComment('b','1',{content: 'tweet'})).rejects.toThrow('Not found')
         expect(PostRepositoryMock.getById).toHaveBeenCalledWith('1')
         expect(UserRepositoryMock.isPublic).toHaveBeenCalledWith('a')
-        expect(FollowerRepositoryMock.isFollowing).toHaveBeenCalledWith('b','a')
+        expect(FollowerRepositoryMock.getFollowing).toHaveBeenCalledWith('b','a')
     }),
     it('creates and returns post and urls succesfully', async () => {
         let images = ['test.jpg']
@@ -58,7 +58,7 @@ describe('Comment Test', () => {
         expect(result.urls).toContain('returnedPresignedUrl')
         expect(PostRepositoryMock.getById).toHaveBeenCalledWith('1')
         expect(UserRepositoryMock.isPublic).toHaveBeenCalledWith('a')
-        expect(FollowerRepositoryMock.isFollowing).not.toHaveBeenCalled()
+        expect(FollowerRepositoryMock.getFollowing).not.toHaveBeenCalled()
         expect(CommentRepositoryMock.create).toHaveBeenCalledWith('b', '1', {content: 'respuesta', images})
         expect(mockGeneratePresignedUrl).toHaveBeenCalledTimes(images.length)
         expect(mockGenerateKeyImage).toHaveBeenCalled()
@@ -81,17 +81,17 @@ describe('Comment Test', () => {
       expect(returnedPosts).toStrictEqual(postsToBeReturned)
       expect(CommentRepositoryMock.getByUserId).toHaveBeenCalled()
       expect(UserRepositoryMock.isPublic).toHaveBeenCalled()
-      expect(FollowerRepositoryMock.isFollowing).not.toHaveBeenCalled()
+      expect(FollowerRepositoryMock.getFollowing).not.toHaveBeenCalled()
     })
     it('throws not found exception because author is private and requester does not follows', async () => {
       UserRepositoryMock.isPublic.mockResolvedValue(false)
-      FollowerRepositoryMock.isFollowing.mockResolvedValue(false)
+      FollowerRepositoryMock.getFollowing.mockResolvedValue(false)
             
       await expect(service.getCommentsByUser('b','a')).rejects.toThrow('Not found');
     
       expect(CommentRepositoryMock.getByUserId).not.toHaveBeenCalled()
       expect(UserRepositoryMock.isPublic).toHaveBeenCalled()
-      expect(FollowerRepositoryMock.isFollowing).toHaveBeenCalled()
+      expect(FollowerRepositoryMock.getFollowing).toHaveBeenCalled()
     })
   }),
   describe('get comments by post', () => { 

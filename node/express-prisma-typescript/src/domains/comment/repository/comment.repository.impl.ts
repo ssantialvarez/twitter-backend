@@ -28,8 +28,9 @@ export class CommentRepositoryImpl implements CommentRepository {
     const comments = await this.db.post.findMany({
       where:{
         AND: [
-          {authorId: authorId,
-          deletedAt: null}
+          {authorId: authorId},
+          {deletedAt: null},
+          {parentPostId:{not: null}}
         ]
       }
     })
@@ -44,7 +45,7 @@ export class CommentRepositoryImpl implements CommentRepository {
       include:{
         author: true,
         reactions: true,
-        _count: {select: {comments: true}}
+        _count: {select: {comments: {where: {deletedAt: null}}}}
       },
       where:{
         parentPostId: postId,

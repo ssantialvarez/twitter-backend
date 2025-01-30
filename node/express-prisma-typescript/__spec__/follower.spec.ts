@@ -25,14 +25,21 @@ describe('Follower Test', () => {
   }),
   describe('unfollow user', () => {
     it('unfollows', async () => {
+      FollowerRepositoryMock.unfollow.mockResolvedValue([new FollowDTO({createdAt: new Date(), followedId: 'a', followerId: 'b'})])
       await service.unfollowUser('b', 'a')
+      expect(FollowerRepositoryMock.unfollow).toHaveBeenCalledWith('b', 'a')
+    }),
+    it('unfollows', async () => {
+      FollowerRepositoryMock.unfollow.mockResolvedValue([])
+      await expect(service.unfollowUser('b', 'a')).rejects.toThrow('Not found')
       expect(FollowerRepositoryMock.unfollow).toHaveBeenCalledWith('b', 'a')
     })
   }),
   describe('is following user', () => {
     it('is following', async () => {
+      
       await service.isFollowing('b', 'a')
-      expect(FollowerRepositoryMock.isFollowing).toHaveBeenCalledWith('b', 'a')
+      expect(FollowerRepositoryMock.getFollowing).toHaveBeenCalledWith('b', 'a')
     })
   }),
   describe('gets followers', () => {

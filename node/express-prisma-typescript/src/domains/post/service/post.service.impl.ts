@@ -2,16 +2,14 @@ import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto'
 import { PostRepository } from '../repository'
 import { PostService } from '.'
 import { validate } from 'class-validator'
-import { deleteObjectByKey, ForbiddenException, generateKeyImage, generatePresignedUrl, NotFoundException } from '@utils'
+import { deleteObjectByKey, ForbiddenException, generateKeyImage, generatePresignedUrl, NotFoundException, validatesPostView } from '@utils'
 import { CursorPagination } from '@types'
 import { FollowerRepository } from '@domains/follower/repository'
 import { UserRepository } from '@domains/user/repository'
 
 export class PostServiceImpl implements PostService {
   constructor (
-    private readonly repository: PostRepository, 
-    private readonly followRepository: FollowerRepository, 
-    private readonly userRepository: UserRepository) {}
+    private readonly repository: PostRepository) {}
 
   async createPost (userId: string, data: CreatePostInputDTO): Promise<{post: PostDTO, urls: string[]}> {
     await validate(data)
@@ -48,7 +46,7 @@ export class PostServiceImpl implements PostService {
 
   async getPost (userId: string, postId: string): Promise<PostDTO> {
     const post = await this.repository.getById(postId)
-    if (!post || !await this.validatesPostView(userId,post.authorId)) throw new NotFoundException('post')
+    if (!post || !await validatesPostView(userId,post.authorId)) throw new NotFoundException('post')
 
     return post
   }
@@ -58,14 +56,15 @@ export class PostServiceImpl implements PostService {
   }
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<ExtendedPostDTO[]> {
-    if(!await this.validatesPostView(userId,authorId)) throw new NotFoundException('post')
+    if(!await validatesPostView(userId,authorId)) throw new NotFoundException('post')
       
     return await this.repository.getByAuthorId(authorId) 
   }
-
+  /*
   private async validatesPostView(userId: string, authorId: string): Promise<Boolean> {
     const isPublic = await this.userRepository.isPublic(authorId)
 
-    return (isPublic) ? isPublic : await this.followRepository.isFollowing(userId,authorId)
-  }  
+    return (isPublic) ? isPublic : await this.followRepository.getFollowing(userId,authorId)
+  } 
+  */ 
 }

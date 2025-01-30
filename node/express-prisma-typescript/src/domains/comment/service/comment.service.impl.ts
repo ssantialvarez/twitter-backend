@@ -21,9 +21,7 @@ export class CommentServiceImpl implements CommentService {
     if(!parentPost)
       throw new NotFoundException('post')
 
-    const authorIsPublic = await this.userRepository.isPublic(parentPost.authorId)
-
-    if(!authorIsPublic && !(await this.followerRepository.isFollowing(userId,parentPost.authorId)) && userId != parentPost.authorId)
+    if(!await this.validatesPostView(userId, parentPost.authorId))
       throw new NotFoundException('post')
 
     await validate(data)
@@ -58,7 +56,7 @@ export class CommentServiceImpl implements CommentService {
   private async validatesPostView(userId: string, authorId: string): Promise<Boolean> {
     const isPublic = await this.userRepository.isPublic(authorId)
 
-    return (isPublic) ? isPublic : await this.followerRepository.isFollowing(userId,authorId)
+    return (isPublic) ? isPublic : await this.followerRepository.getFollowing(userId,authorId)
   }
 
 }

@@ -24,18 +24,19 @@ export class FollowerRepositoryImpl implements FollowerRepository {
     }).then(follow => new FollowDTO(follow))
   }
 
-  async unfollow (followerId: string, followedId: string): Promise<void> {
-    const data = { followedId: followedId, followerId: followerId }
+  async unfollow (followerId: string, followedId: string): Promise<FollowDTO[]> {
     
-    await this.db.follow.update({
+    const result =  await this.db.follow.updateManyAndReturn({
       where : {
-        followedId_followerId: data
+        followedId,
+        followerId,
+        deletedAt: null
       },
       data: {
         deletedAt: new Date()
       }
     })
-    
+    return result.map(res => new FollowDTO(res))
   }
 
   async getFollowers (followedId: string): Promise<UserViewDTO[]> {
@@ -76,7 +77,7 @@ export class FollowerRepositoryImpl implements FollowerRepository {
     return users.map(user => new UserViewDTO(user.followed))
   }
 
-  async isFollowing (followerId: string, followedId: string): Promise<Boolean>{
+  async getFollowing (followerId: string, followedId: string): Promise<Boolean>{
 
     const result = await this.db.follow.findFirst({
       where: {

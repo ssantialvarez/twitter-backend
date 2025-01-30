@@ -3,6 +3,10 @@ import { NextFunction, Request, Response } from 'express'
 import { ValidationException } from './errors'
 import { plainToInstance } from 'class-transformer'
 import { ClassType } from '@types'
+import { db } from './database'
+import { UserRepositoryImpl } from '@domains/user/repository'
+import { FollowerRepositoryImpl } from '@domains/follower/repository'
+
 
 export function BodyValidation<T> (target: ClassType<T>) {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -16,4 +20,16 @@ export function BodyValidation<T> (target: ClassType<T>) {
 
     next()
   }
+}
+
+export async function validatesPostView(userId: string, authorId: string) {
+  if(userId == authorId)
+    return true
+
+  const userRepository = new UserRepositoryImpl(db)
+  const followRepository = new FollowerRepositoryImpl(db)
+
+  const isPublic = await userRepository.isPublic(authorId)
+
+  return (isPublic) ? isPublic : await followRepository.getFollowing(userId,authorId)
 }

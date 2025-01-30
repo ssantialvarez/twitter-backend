@@ -1,6 +1,6 @@
 import { FollowerRepository } from '../repository'
 import { FollowerService } from '.'
-import { ConflictException } from '@utils'
+import { ConflictException, NotFoundException } from '@utils'
 import { UserViewDTO } from '@domains/user/dto';
 import { FollowDTO } from '../dto';
 
@@ -13,14 +13,16 @@ export class FollowerServiceImpl implements FollowerService {
     return this.repository.follow(followerId,followedId);
   }
 
-  async unfollowUser (followerId: string, followedId: string): Promise<void> {
-    
-    return this.repository.unfollow(followerId,followedId);
+  async unfollowUser (followerId: string, followedId: string): Promise<FollowDTO> {
+    const result = await this.repository.unfollow(followerId,followedId)
+      if(result.length == 0) throw new NotFoundException('follow')
+        
+    return result.pop() as FollowDTO
   }
 
   async isFollowing (followerId: string, followedId: string): Promise<Boolean> {
     
-    return this.repository.isFollowing(followerId,followedId);
+    return this.repository.getFollowing(followerId,followedId);
   }
 
   async getFollowersById (followedId: string): Promise<UserViewDTO[]> {

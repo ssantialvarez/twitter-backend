@@ -17,7 +17,7 @@ reactionRouter.post('/:postId', async (req: Request, res: Response) => {
   const { postId } = req.params
   let requestedReaction  = req.query.reaction as string
   requestedReaction = requestedReaction.toLocaleUpperCase()
-  //agregar info de la reaccion
+  
   const reaction = await service.insertReaction(userId,postId,requestedReaction as ReactionType)
 
   return res.status(HttpStatus.OK).json(reaction)
@@ -30,7 +30,7 @@ reactionRouter.delete('/:postId', async (req: Request, res: Response) => {
   await service.deleteReaction(userId,postId,req.query.reaction as ReactionType)
   
 
-  return res.sendStatus(HttpStatus.OK)
+  return res.status(HttpStatus.OK).send(`Deleted ${req.query.reaction} at post ${postId}`)
 })
 
 reactionRouter.get('/:userId', async (req: Request, res: Response) => {

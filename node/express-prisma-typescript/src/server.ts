@@ -30,6 +30,9 @@ const options = {
       {
         url: "http://localhost:8080/api",
       },
+      {
+        url: "https://twitter-backend-production-2bd1.up.railway.app/api",
+      },
     ],
   },
   apis: ["./src/router/index.ts"],
