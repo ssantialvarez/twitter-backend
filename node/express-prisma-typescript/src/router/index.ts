@@ -211,13 +211,13 @@ router.use('/chat', withAuth, chatRouter)
  *     responses:
  *       200:
  *         description: OK
- * /signup:
+ * /auth/signup:
  *   post:
  *     tags: [Auth]
  *     requestBody:
  *        $ref: '#/components/requestBodies/UserCredentials'
  *     responses:
- *       200:
+ *       201:
  *         content:
  *           application/json:
  *             schema:
@@ -225,7 +225,7 @@ router.use('/chat', withAuth, chatRouter)
  *       500:
  *         description: Some server error
  * 
- * /login:
+ * /auth/login:
  *   post:
  *     tags: [Auth]
  *     requestBody:
@@ -275,7 +275,7 @@ router.use('/chat', withAuth, chatRouter)
  * /follower/followers:
  *   get:
  *     summary: Get a list of your followers.
- *     tags: [User]
+ *     tags: [Follower]
  *     security: 
  *       - bearerAuth: []
  *     responses:
@@ -294,7 +294,7 @@ router.use('/chat', withAuth, chatRouter)
  * /follower/followed:
  *   get:
  *     summary: Get a list of  user you follow.
- *     tags: [User]
+ *     tags: [Follower]
  *     security: 
  *       - bearerAuth: []
  *     responses:
@@ -361,7 +361,7 @@ router.use('/chat', withAuth, chatRouter)
  *       - bearerAuth: [] 
  *     responses:
  *       200:
- *         description: OK
+ *         description: Deleted user.
  *       401:
  *          $ref: '#/components/responses/UnauthorizedError'
  *       500:
