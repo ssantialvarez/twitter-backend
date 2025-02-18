@@ -1,4 +1,4 @@
-import { isBoolean, IsEmail, IsBoolean, IsOptional, IsString, IsStrongPassword } from 'class-validator'
+import { IsEmail, IsBoolean, IsOptional, IsString, IsStrongPassword } from 'class-validator'
 
 export class UserDTO {
   constructor (user: UserDTO) {
