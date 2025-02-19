@@ -1,8 +1,6 @@
 import { PrismaClient, ReactionType } from '@prisma/client'
 import { ChatRepository } from './chat.repository';
 import { MessageDTO } from '../dto';
-import {v4 as uuidv4} from 'uuid';
-
 
 export class ChatRepositoryImpl implements ChatRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -17,7 +15,6 @@ export class ChatRepositoryImpl implements ChatRepository {
     })
     return new MessageDTO(message)
   }
-
 
   async getChat (senderId: string, receiverId: string): Promise<MessageDTO[]> {
     

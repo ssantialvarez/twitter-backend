@@ -132,7 +132,7 @@ export class UserRepositoryImpl implements UserRepository {
           }
         ]
       },
-      take: options.limit ? options.limit : undefined,
+      take: options.limit,
       skip: options.skip ? options.skip : undefined,
       orderBy: [
         {

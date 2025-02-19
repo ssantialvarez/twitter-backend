@@ -17,12 +17,21 @@ export class UserServiceImpl implements UserService {
     return new UserViewDTO(user)
   }
 
-  async getUserRecommendations (userId: any, options: OffsetPagination): Promise<UserViewDTO[]> {
+  async getUserRecommendations (userId: any, options: OffsetPagination): Promise<{users: UserViewDTO[], info: {limit: Number, nextSkip: Number | undefined}}> {
     // returns only users followed by users the original user follows
+    options.limit = options.limit && !Number.isNaN(options.limit) ? options.limit + 1 : 51;
 
     const users = (await this.repository.getRecommendedUsersPaginated(userId, options)).map(user => new UserViewDTO(user))
 
-    return users
+    options.limit -= 1
+    if(users.length == options.limit + 1){
+      options.skip = options.skip ? options.skip + options.limit : options.limit
+      users.pop()
+    }else{
+      options.skip = undefined
+    }
+    
+    return {info:{limit: options.limit, nextSkip: options.skip}, users: users}
   }
 
   async deleteUser (userId: any): Promise<void> {
@@ -38,8 +47,20 @@ export class UserServiceImpl implements UserService {
   }
 
 
-  async getUsersByUsername (username: string, options: OffsetPagination): Promise<UserViewDTO[]>{
-    return await this.repository.getByUsername(username,options)
+  async getUsersByUsername (username: string, options: OffsetPagination): Promise<{users: UserViewDTO[], info: {limit: Number, nextSkip: Number | undefined}}>{
+    options.limit = options.limit && !Number.isNaN(options.limit) ? options.limit + 1 : 51;
+
+    const users = await this.repository.getByUsername(username,options); 
+
+    options.limit -= 1
+    if(users.length == options.limit + 1){
+      options.skip = options.skip ? options.skip + options.limit : options.limit
+      users.pop()
+    }else{
+      options.skip = undefined
+    }
+
+    return {info:{limit: options.limit, nextSkip: options.skip}, users: users}
   }
 
   async updateUser(userId: any, data: UpdateInputDTO) : Promise<{user: ExtendedUserDTO, url: string}> {

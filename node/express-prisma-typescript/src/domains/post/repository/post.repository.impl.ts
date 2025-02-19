@@ -5,7 +5,7 @@ import { CursorPagination } from '@types'
 
 import { PostRepository } from '.'
 import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto'
-import { ExtendedUserDTO, UserViewDTO } from '@domains/user/dto'
+import { UserViewDTO } from '@domains/user/dto'
 
 export class PostRepositoryImpl implements PostRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -20,7 +20,8 @@ export class PostRepositoryImpl implements PostRepository {
     return new PostDTO(post)
   }
 
-  async getAllByDatePaginated (userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {   
+  async getAllByDatePaginated (userId: string, options: { limit: number, before?: string, after?: string }): Promise<ExtendedPostDTO[]> {   
+
     const posts = await this.db.post.findMany({
       include:{
         author: true,
@@ -40,7 +41,7 @@ export class PostRepositoryImpl implements PostRepository {
       },
       cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
-      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
+      take: options.before ? -options.limit : options.limit,
       orderBy: [
         {
           createdAt: 'desc'

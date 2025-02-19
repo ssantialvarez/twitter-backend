@@ -8,8 +8,6 @@ import { db, BodyValidation } from '@utils'
 import { PostRepositoryImpl } from '../repository'
 import { PostService, PostServiceImpl } from '../service'
 import { CreatePostInputDTO } from '../dto'
-import { FollowerRepositoryImpl } from '@domains/follower/repository'
-import { UserRepositoryImpl } from '@domains/user/repository'
 
 export const postRouter = Router()
 
@@ -20,7 +18,6 @@ postRouter.get('/', async (req: Request, res: Response) => {
   const { limit, before, after } = req.query as Record<string, string>
 
   const posts = await service.getLatestPosts(userId, { limit: Number(limit), before, after })
-
   
   return res.status(HttpStatus.OK).json(posts)
 })

@@ -51,8 +51,12 @@ export class PostServiceImpl implements PostService {
     return post
   }
 
-  async getLatestPosts (userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
-    return await this.repository.getAllByDatePaginated(userId, options)
+  async getLatestPosts (userId: string, options: CursorPagination): Promise<{posts: ExtendedPostDTO[], info: {limit: Number, previousCursor: string, nextCursor: string}}> {
+    options.limit = options.limit && !Number.isNaN(options.limit) ? options.limit : 50;
+    
+    const posts = await this.repository.getAllByDatePaginated(userId, {limit: options.limit, after: options.after, before: options.before})
+    const info = {limit: options.limit, previousCursor: posts[0].id, nextCursor: posts[posts.length-1].id}
+    return {info, posts}
   }
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<ExtendedPostDTO[]> {
@@ -60,11 +64,4 @@ export class PostServiceImpl implements PostService {
       
     return await this.repository.getByAuthorId(authorId) 
   }
-  /*
-  private async validatesPostView(userId: string, authorId: string): Promise<Boolean> {
-    const isPublic = await this.userRepository.isPublic(authorId)
-
-    return (isPublic) ? isPublic : await this.followRepository.getFollowing(userId,authorId)
-  } 
-  */ 
 }

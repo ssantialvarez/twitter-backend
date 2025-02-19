@@ -35,7 +35,6 @@ services:
     ports:
       - '8080:8080'
     volumes: # if there's any new files containing sources, add them as volumes
-      - ./frontend:/app/frontend
       - ./src:/app/src
       - ./prisma:/app/prisma
     depends_on:

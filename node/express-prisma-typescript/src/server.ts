@@ -10,9 +10,6 @@ import { createServer } from 'http'
 import { Constants, NodeEnv, Logger, setupIO, withAuth } from '@utils'
 import { router } from '@router'
 import { ErrorHandling } from '@utils/errors'
-import path from 'path'
-const { join } = require('node:path');
-
 
 const app = express()
 const server = createServer(app)
@@ -55,20 +52,9 @@ app.use(
   })
 )
 
-
-app.use(express.static(path.join(__dirname, "../frontend")));
-
 app.use('/api', router)
 
 app.use(ErrorHandling)
-
-app.get('/', (req, res) => {
-  res.sendFile(join(__dirname,'..','frontend','pages','index.html'));
-});
-
-app.get("/chat", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/pages/chat.html"));
-});
 
 const specs = swaggerJSDoc(options);
 app.use(

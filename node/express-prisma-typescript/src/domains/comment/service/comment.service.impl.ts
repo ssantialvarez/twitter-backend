@@ -47,10 +47,14 @@ export class CommentServiceImpl implements CommentService {
     return await this.repository.getByUserId(authorId)
   }
   
-  async getCommentsByPost (postId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
+  async getCommentsByPost (postId: string, options: CursorPagination): Promise<{comments: ExtendedPostDTO[], info: {limit: Number, previousCursor: string, nextCursor: string}}> {
+    options.limit = options.limit && !Number.isNaN(options.limit) ? options.limit : 50;
+    
     const comments = await this.repository.getAllByDatePaginated(postId, options)
     comments.sort((a,b) => b.qtyLikes - a.qtyLikes == 0 ? (b.qtyRetweets - a.qtyRetweets == 0 ? b.qtyComments - a.qtyComments : b.qtyRetweets - a.qtyRetweets) : b.qtyLikes - a.qtyLikes)
-    return comments
+    
+    const info = {limit: options.limit, previousCursor: comments[0].id, nextCursor: comments[comments.length-1].id}
+    return {info, comments}
   }
 
   private async validatesPostView(userId: string, authorId: string): Promise<Boolean> {
