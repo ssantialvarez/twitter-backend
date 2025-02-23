@@ -44,7 +44,7 @@ export class PostServiceImpl implements PostService {
     await this.repository.delete(postId)
   }
 
-  async getPost (userId: string, postId: string): Promise<PostDTO> {
+  async getPost (userId: string, postId: string): Promise<ExtendedPostDTO> {
     const post = await this.repository.getById(postId)
     if (!post || !await validatesPostView(userId,post.authorId)) throw new NotFoundException('post')
 
@@ -55,6 +55,14 @@ export class PostServiceImpl implements PostService {
     options.limit = options.limit && !Number.isNaN(options.limit) ? options.limit : 50;
     
     const posts = await this.repository.getAllByDatePaginated(userId, {limit: options.limit, after: options.after, before: options.before})
+    const info = {limit: options.limit, previousCursor: posts[0].id, nextCursor: posts[posts.length-1].id}
+    return {info, posts}
+  }
+
+  async getPostsByFollows (userId: string, options: CursorPagination): Promise<{posts: ExtendedPostDTO[], info: {limit: Number, previousCursor: string, nextCursor: string}}> {
+    options.limit = options.limit && !Number.isNaN(options.limit) ? options.limit : 50;
+    
+    const posts = await this.repository.getByFollow(userId, {limit: options.limit, after: options.after, before: options.before})
     const info = {limit: options.limit, previousCursor: posts[0].id, nextCursor: posts[posts.length-1].id}
     return {info, posts}
   }

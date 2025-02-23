@@ -21,26 +21,34 @@ export class ExtendedUserDTO extends UserDTO {
     this.username = user.username
     this.password = user.password
     this.public = user.public
+    this.followers = user.followers
+    this.following = user.following
   }
+  followers!: string[]
+  following!: string[]
   public!:boolean
   email!: string
   username!: string
   password!: string
 }
-export class UserViewDTO {
-  constructor (user: UserViewDTO) {
-    this.id = user.id
-    this.name = user.name
-    this.username = user.username
-    this.profilePicture = user.profilePicture
-  }
 
-  id: string
-  name: string | null
+export class UserViewDTO extends UserDTO {
+  constructor (user: UserViewDTO) {
+    super(user)
+    this.username = user.username
+  }
   username: string
-  profilePicture: string | null
 }
 
+export class UserProfileDTO extends UserViewDTO {
+  constructor (user: UserProfileDTO) {
+    super(user)
+    this.followers = user.followers;
+    this.following = user.following;
+  }
+  followers!: string[]
+  following!: string[]
+} 
 
 export class UpdateInputDTO {
   @IsOptional()

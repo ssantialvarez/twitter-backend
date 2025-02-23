@@ -60,6 +60,42 @@ export class PostRepositoryImpl implements PostRepository {
       qtyRetweets: post.reactions.filter(reaction => reaction.reaction == ReactionType.RETWEET).length
     }))
     }
+    async getByFollow (userId: string, options: { limit: number, before?: string, after?: string }): Promise<ExtendedPostDTO[]> {   
+
+      const posts = await this.db.post.findMany({
+        include:{
+          author: true,
+          reactions: true,
+          _count: {select: {comments: {where: {deletedAt: {not: null}}}}}
+        },
+        where:{
+          author:{
+            followers:{some:{followerId: userId}}
+          },
+          parentPostId: null,
+          deletedAt: null
+        },
+        cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
+        skip: options.after ?? options.before ? 1 : undefined,
+        take: options.before ? -options.limit : options.limit,
+        orderBy: [
+          {
+            createdAt: 'desc'
+          },
+          {
+            id: 'asc'
+          }
+        ]
+      })
+      
+      return posts.map(post => new ExtendedPostDTO({
+        ...post,
+        author: new UserViewDTO(post.author),
+        qtyComments: post._count.comments,
+        qtyLikes: post.reactions.filter(reaction => reaction.reaction == ReactionType.LIKE).length,
+        qtyRetweets: post.reactions.filter(reaction => reaction.reaction == ReactionType.RETWEET).length
+      }))
+      }
 
   async delete (postId: string): Promise<void> {
     await this.db.post.update({
@@ -72,14 +108,25 @@ export class PostRepositoryImpl implements PostRepository {
     })
   }
 
-  async getById (postId: string): Promise<PostDTO | null> {
+  async getById (postId: string): Promise<ExtendedPostDTO | null> {
     const post = await this.db.post.findUnique({
       where: {
         id: postId,
         deletedAt: null
+      },
+      include:{
+        author: true,
+        reactions: true,
+        _count: {select: {comments: true}}
       }
     })
-    return (post != null) ? new PostDTO(post) : null
+    return (post != null) ? new ExtendedPostDTO({
+      ...post, 
+      author: new UserViewDTO(post.author),
+      qtyComments: post._count.comments,
+      qtyLikes: post.reactions.filter(reaction => reaction.reaction == ReactionType.LIKE).length,
+      qtyRetweets: post.reactions.filter(reaction => reaction.reaction == ReactionType.RETWEET).length
+    }) : null
   }
 
   async getByAuthorId (authorId: string): Promise<ExtendedPostDTO[]> {

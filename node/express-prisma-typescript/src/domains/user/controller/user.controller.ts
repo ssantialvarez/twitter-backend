@@ -35,13 +35,22 @@ userRouter.get('/me', async (req: Request, res: Response) => {
 userRouter.get('/:userId', async (req: Request, res: Response) => {
   const { userId: otherUserId } = req.params
   const { userId } = res.locals.context
+  
   const user = await service.getUser(otherUserId)
   const followsYou = await service.checkFollow(otherUserId, userId)
-  
-  const result = {user, followsYou}
-  
-  return res.status(HttpStatus.OK).json(result)
+    
+  return res.status(HttpStatus.OK).json({user, followsYou})
 })
+
+userRouter.get('/profile/:userId', async (req: Request, res: Response) => {
+  const { userId: otherUserId } = req.params
+  
+  const user = await service.getUserProfile(otherUserId)
+  
+  
+  return res.status(HttpStatus.OK).json(user)
+})
+
 
 userRouter.get('/by_username/:username', async (req: Request, res: Response) => {
   const { username } = req.params

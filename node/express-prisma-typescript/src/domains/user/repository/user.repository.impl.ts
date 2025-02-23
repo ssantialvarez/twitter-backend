@@ -16,12 +16,16 @@ export class UserRepositoryImpl implements UserRepository {
 
   async getById (userId: any): Promise<ExtendedUserDTO | null> {
     const user = await this.db.user.findUnique({
+      include:{
+        followers: {select: {followerId: true}},
+        follows: {select: {followedId: true}},
+      },
       where: {
         id: userId,
         deletedAt: null
       }
     })
-    return user ? new ExtendedUserDTO(user) : null
+    return user ? new ExtendedUserDTO({ ...user, followers: user.followers.flatMap((fol) => fol.followerId), following: user.follows.flatMap((fol) => fol.followedId)}) : null
   }
 
   async delete (userId: string): Promise<void> {
@@ -60,6 +64,10 @@ export class UserRepositoryImpl implements UserRepository {
     
     const users = await this.db.user.findMany({
       distinct: "id",
+      include:{
+        followers: {select: {followerId: true}},
+        follows: {select: {followedId: true}},
+      },
       take: options.limit ? options.limit : undefined,
       skip: options.skip ? options.skip : undefined,
       where: { 
@@ -73,11 +81,15 @@ export class UserRepositoryImpl implements UserRepository {
         }
       ]
     })
-    return users.map(user => new ExtendedUserDTO(user))
+    return users.map(user => new ExtendedUserDTO({ ...user, followers: user.followers.flatMap((fol) => fol.followerId), following: user.follows.flatMap((fol) => fol.followedId)}))
   }
 
   async getByEmailOrUsername (email?: string, username?: string): Promise<ExtendedUserDTO | null> {
     const user = await this.db.user.findFirst({
+      include:{
+        followers: {select: {followerId: true}},
+        follows: {select: {followedId: true}},
+      },
       where: { AND: [
         {OR: [
           {
@@ -91,7 +103,7 @@ export class UserRepositoryImpl implements UserRepository {
       }]
       }
     })
-    return user ? new ExtendedUserDTO(user) : null
+    return user ? new ExtendedUserDTO({ ...user, followers: user.followers.flatMap((fol) => fol.followerId), following: user.follows.flatMap((fol) => fol.followedId)}) : null
   }
 
   async isPublic (userId: string): Promise<Boolean> {
@@ -113,11 +125,15 @@ export class UserRepositoryImpl implements UserRepository {
 
   async update (userId: string, data: UpdateInputDTO): Promise<ExtendedUserDTO>{
     return await this.db.user.update({
+      include:{
+        followers: {select: {followerId: true}},
+        follows: {select: {followedId: true}},
+      },
       where:{
         id: userId
       },
       data: data
-    }).then(user => new ExtendedUserDTO(user))
+    }).then(user => new ExtendedUserDTO({ ...user, followers: user.followers.flatMap((fol) => fol.followerId), following: user.follows.flatMap((fol) => fol.followedId)}))
   }
 
 

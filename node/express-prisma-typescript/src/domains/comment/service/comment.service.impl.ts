@@ -47,13 +47,13 @@ export class CommentServiceImpl implements CommentService {
     return await this.repository.getByUserId(authorId)
   }
   
-  async getCommentsByPost (postId: string, options: CursorPagination): Promise<{comments: ExtendedPostDTO[], info: {limit: Number, previousCursor: string, nextCursor: string}}> {
+  async getCommentsByPost (postId: string, options: CursorPagination): Promise<{comments: ExtendedPostDTO[], info: {limit: Number, previousCursor: string | null, nextCursor: string | null}}> {
     options.limit = options.limit && !Number.isNaN(options.limit) ? options.limit : 50;
     
     const comments = await this.repository.getAllByDatePaginated(postId, options)
     comments.sort((a,b) => b.qtyLikes - a.qtyLikes == 0 ? (b.qtyRetweets - a.qtyRetweets == 0 ? b.qtyComments - a.qtyComments : b.qtyRetweets - a.qtyRetweets) : b.qtyLikes - a.qtyLikes)
     
-    const info = {limit: options.limit, previousCursor: comments[0].id, nextCursor: comments[comments.length-1].id}
+    const info = {limit: options.limit, previousCursor: comments[0] ? comments[0].id: null, nextCursor: comments[0] ? comments[comments.length-1].id : null}
     return {info, comments}
   }
 

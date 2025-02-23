@@ -1,6 +1,6 @@
 import { InternalServerErrorException, NotFoundException } from '@utils/errors'
 import { OffsetPagination } from 'types'
-import { UserViewDTO, ExtendedUserDTO, UpdateInputDTO } from '../dto'
+import { UserViewDTO, ExtendedUserDTO, UpdateInputDTO, UserProfileDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
 import { FollowerRepository } from '@domains/follower/repository'
@@ -15,6 +15,12 @@ export class UserServiceImpl implements UserService {
     const user = await this.repository.getById(userId)
     if (!user) throw new NotFoundException('user')
     return new UserViewDTO(user)
+  }
+
+  async getUserProfile (userId: any): Promise<UserProfileDTO> {
+    const user = await this.repository.getById(userId)
+    if (!user) throw new NotFoundException('user')
+    return new UserProfileDTO(user)
   }
 
   async getUserRecommendations (userId: any, options: OffsetPagination): Promise<{users: UserViewDTO[], info: {limit: Number, nextSkip: Number | undefined}}> {
