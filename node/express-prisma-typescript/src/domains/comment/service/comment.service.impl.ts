@@ -16,7 +16,7 @@ export class CommentServiceImpl implements CommentService {
     private readonly postRepository: PostRepository
     ) {}
 
-  async createComment (userId: string, postId: string, data: CreatePostInputDTO): Promise<{comment: PostDTO, urls: string[]}> {
+  async createComment (userId: string, postId: string, data: CreatePostInputDTO): Promise<{comment: PostDTO, images: string[]}> {
     const parentPost = await this.postRepository.getById(postId)
     if(!parentPost)
       throw new NotFoundException('post')
@@ -38,7 +38,7 @@ export class CommentServiceImpl implements CommentService {
     }
 
     const comment = await this.repository.create(userId, postId, data)
-    return {comment,urls}
+    return {comment,images: urls}
   }
 
   async getCommentsByUser (authorId: string, userId: string): Promise<PostDTO[]>{

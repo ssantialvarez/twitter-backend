@@ -70,7 +70,7 @@ export class PostRepositoryImpl implements PostRepository {
         },
         where:{
           author:{
-            followers:{some:{followerId: userId}}
+            followers:{some:{followerId: userId, deletedAt: null}}
           },
           parentPostId: null,
           deletedAt: null
@@ -87,7 +87,6 @@ export class PostRepositoryImpl implements PostRepository {
           }
         ]
       })
-      
       return posts.map(post => new ExtendedPostDTO({
         ...post,
         author: new UserViewDTO(post.author),
@@ -139,7 +138,8 @@ export class PostRepositoryImpl implements PostRepository {
       },
       where: {
         authorId,
-        deletedAt: null
+        deletedAt: null,
+        parentPost: null
       }
 
     })

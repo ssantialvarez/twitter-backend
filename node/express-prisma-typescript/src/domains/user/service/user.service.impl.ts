@@ -1,6 +1,6 @@
 import { InternalServerErrorException, NotFoundException } from '@utils/errors'
 import { OffsetPagination } from 'types'
-import { UserViewDTO, ExtendedUserDTO, UpdateInputDTO, UserProfileDTO } from '../dto'
+import { UserViewDTO, ExtendedUserDTO, UpdateInputDTO, UserProfileDTO, UserDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
 import { FollowerRepository } from '@domains/follower/repository'

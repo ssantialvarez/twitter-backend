@@ -17,8 +17,8 @@ export class UserRepositoryImpl implements UserRepository {
   async getById (userId: any): Promise<ExtendedUserDTO | null> {
     const user = await this.db.user.findUnique({
       include:{
-        followers: {select: {followerId: true}},
-        follows: {select: {followedId: true}},
+        followers: {select: {followerId: true}, where:{deletedAt: null}},
+        follows: {select: {followedId: true}, where:{deletedAt: null}},
       },
       where: {
         id: userId,
@@ -90,8 +90,8 @@ export class UserRepositoryImpl implements UserRepository {
         followers: {select: {followerId: true}},
         follows: {select: {followedId: true}},
       },
-      where: { AND: [
-        {OR: [
+      where: { 
+        OR: [
           {
             email
           },
@@ -100,7 +100,7 @@ export class UserRepositoryImpl implements UserRepository {
           }
         ],
         deletedAt: null 
-      }]
+      
       }
     })
     return user ? new ExtendedUserDTO({ ...user, followers: user.followers.flatMap((fol) => fol.followerId), following: user.follows.flatMap((fol) => fol.followedId)}) : null

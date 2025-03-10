@@ -11,7 +11,7 @@ export class PostServiceImpl implements PostService {
   constructor (
     private readonly repository: PostRepository) {}
 
-  async createPost (userId: string, data: CreatePostInputDTO): Promise<{post: PostDTO, urls: string[]}> {
+  async createPost (userId: string, data: CreatePostInputDTO): Promise<{post: PostDTO, images: string[]}> {
     await validate(data)
     let urls: string[]
     urls = []
@@ -29,7 +29,7 @@ export class PostServiceImpl implements PostService {
 
     const post = await this.repository.create(userId, data)
 
-    return {post, urls}
+    return {post, images: urls}
   }
 
   async deletePost (userId: string, postId: string): Promise<void> {
@@ -53,23 +53,37 @@ export class PostServiceImpl implements PostService {
 
   async getLatestPosts (userId: string, options: CursorPagination): Promise<{posts: ExtendedPostDTO[], info: {limit: Number, previousCursor: string, nextCursor: string}}> {
     options.limit = options.limit && !Number.isNaN(options.limit) ? options.limit : 50;
+    let previousCursor : string = '';
+    let nextCursor : string = '';
     
     const posts = await this.repository.getAllByDatePaginated(userId, {limit: options.limit, after: options.after, before: options.before})
-    const info = {limit: options.limit, previousCursor: posts[0].id, nextCursor: posts[posts.length-1].id}
+    if(posts.length > 0){
+      previousCursor = posts[0].id;
+      nextCursor = posts[posts.length-1].id;
+    }
+    
+    const info = {limit: options.limit, previousCursor, nextCursor}
     return {info, posts}
   }
 
   async getPostsByFollows (userId: string, options: CursorPagination): Promise<{posts: ExtendedPostDTO[], info: {limit: Number, previousCursor: string, nextCursor: string}}> {
     options.limit = options.limit && !Number.isNaN(options.limit) ? options.limit : 50;
+    let previousCursor : string = '';
+    let nextCursor : string = '';
     
     const posts = await this.repository.getByFollow(userId, {limit: options.limit, after: options.after, before: options.before})
-    const info = {limit: options.limit, previousCursor: posts[0].id, nextCursor: posts[posts.length-1].id}
+    if(posts.length > 0){
+      previousCursor = posts[0].id;
+      nextCursor = posts[posts.length-1].id;
+    }
+    
+    const info = {limit: options.limit, previousCursor, nextCursor}
     return {info, posts}
   }
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<ExtendedPostDTO[]> {
-    if(!await validatesPostView(userId,authorId)) throw new NotFoundException('post')
-      
+    if(!await validatesPostView(userId,authorId)) 
+      throw new NotFoundException('posts. Account may be private.')
     return await this.repository.getByAuthorId(authorId) 
   }
 }

@@ -29,3 +29,11 @@ authRouter.post('/login', BodyValidation(LoginInputDTO), async (req: Request, re
 
   return res.status(HttpStatus.OK).json(token)
 })
+
+authRouter.get('/by_email_username/:usernameEmail', async (req: Request, res: Response) => {
+  const { usernameEmail } = req.params
+  
+  const user = await service.getUserByEmailOrUsername(usernameEmail)
+  
+  return res.status(HttpStatus.OK).json(user)
+})

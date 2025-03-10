@@ -6,12 +6,14 @@ export class UserDTO {
     this.name = user.name
     this.profilePicture = user.profilePicture
     this.createdAt = user.createdAt
+    this.public = user.public
   }
 
   id: string
   name: string | null
   profilePicture: string | null
   createdAt: Date
+  public!:boolean
 }
 
 export class ExtendedUserDTO extends UserDTO {
@@ -20,13 +22,13 @@ export class ExtendedUserDTO extends UserDTO {
     this.email = user.email
     this.username = user.username
     this.password = user.password
-    this.public = user.public
+    
     this.followers = user.followers
     this.following = user.following
   }
   followers!: string[]
   following!: string[]
-  public!:boolean
+  
   email!: string
   username!: string
   password!: string

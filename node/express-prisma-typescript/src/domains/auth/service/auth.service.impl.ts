@@ -10,13 +10,14 @@ import {
 
 import { LoginInputDTO, SignupInputDTO, TokenDTO } from '../dto'
 import { AuthService } from './auth.service'
+import { UserDTO } from '@domains/user/dto'
 
 export class AuthServiceImpl implements AuthService {
   constructor (private readonly repository: UserRepository) {}
 
   async signup (data: SignupInputDTO): Promise<TokenDTO> {
     const existingUser = await this.repository.getByEmailOrUsername(data.email, data.username)
-    if (existingUser) throw new ConflictException('USER_ALREADY_EXISTS')
+    if (existingUser) throw new ConflictException(`${(existingUser.email === data.email) ? 'EMAIL_' : ''}${(existingUser.username === data.username) ? 'USERNAME_' : ''}ALREADY_EXISTS`)
 
     const encryptedPassword = await encryptPassword(data.password)
 
@@ -37,5 +38,11 @@ export class AuthServiceImpl implements AuthService {
     const token = generateAccessToken({ userId: user.id })
 
     return { token }
+  }
+
+  async getUserByEmailOrUsername (data: string): Promise<UserDTO>{
+    const user = await this.repository.getByEmailOrUsername(data, data);
+    if(!user) throw new NotFoundException('user')
+    return new UserDTO(user)
   }
 }

@@ -35,6 +35,7 @@ export class ExtendedPostDTO extends PostDTO {
   constructor (post: ExtendedPostDTO) {
     super(post)
     this.author = post.author
+    this.parentPostId = post.parentPostId
     this.qtyComments = post.qtyComments
     this.qtyLikes = post.qtyLikes
     this.qtyRetweets = post.qtyRetweets
@@ -42,6 +43,7 @@ export class ExtendedPostDTO extends PostDTO {
   }
 
   reactions: ReactionDTO[]
+  parentPostId: string | null
   author!: UserViewDTO
   qtyComments!: number
   qtyLikes!: number

@@ -24,6 +24,7 @@ postRouter.get('/', async (req: Request, res: Response) => {
 
 postRouter.get('/following', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
+  
   const { limit, before, after } = req.query as Record<string, string>
 
   const posts = await service.getPostsByFollows(userId, { limit: Number(limit), before, after })

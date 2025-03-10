@@ -48,6 +48,7 @@ export class CommentRepositoryImpl implements CommentRepository {
         _count: {select: {comments: {where: {deletedAt: null}}}}
       },
       where:{
+        deletedAt: null,
         parentPostId: postId,
       },
       cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
@@ -57,6 +58,7 @@ export class CommentRepositoryImpl implements CommentRepository {
     
     return comments.map(comment => new ExtendedPostDTO({
           ...comment,
+          
           author: new UserViewDTO(comment.author),
           qtyComments: comment._count.comments,
           qtyLikes: comment.reactions.filter(reaction => reaction.reaction == ReactionType.LIKE).length,
