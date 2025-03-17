@@ -33,7 +33,8 @@ export class PostRepositoryImpl implements PostRepository {
           OR:[{
             followers:{some:{followerId: userId}}
           },
-          {public: true}
+          {public: true},
+          {id: userId}
           ]
         },
         parentPostId: null,
@@ -69,8 +70,11 @@ export class PostRepositoryImpl implements PostRepository {
           _count: {select: {comments: {where: {deletedAt: {not: null}}}}}
         },
         where:{
-          author:{
-            followers:{some:{followerId: userId, deletedAt: null}}
+          author:{OR:[
+            {followers:{some:{followerId: userId, deletedAt: null}}},
+            {id: userId}
+          ]
+            
           },
           parentPostId: null,
           deletedAt: null
