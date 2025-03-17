@@ -48,7 +48,9 @@ describe('Follower Test', () => {
         id: 'b',
         name: 'julian',
         profilePicture: 'test.jpg',
-        username: 'juli'
+        username: 'juli',
+        public: true,
+        createdAt: new Date()
       })]
 
       FollowerRepositoryMock.getFollowers.mockResolvedValue(followers)
@@ -65,7 +67,9 @@ describe('Follower Test', () => {
         id: 'b',
         name: 'julian',
         profilePicture: 'test.jpg',
-        username: 'juli'
+        username: 'juli',
+        public: true,
+        createdAt: new Date()
       })]
 
       FollowerRepositoryMock.getFollowed.mockResolvedValue(followed)

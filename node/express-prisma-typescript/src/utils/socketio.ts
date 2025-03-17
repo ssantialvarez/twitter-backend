@@ -13,45 +13,52 @@ export let io: Server
 
 export const setupIO = (server: httpServer) => {
   io = new Server(server, {
-    cors: { origin: '*', methods: ['GET', 'POST'] },
-    connectionStateRecovery: {}
-  })
+    cors: { 
+        origin: 'http://localhost:3000',  
+        methods: ['GET', 'POST'],
+        credentials: true                 
+    },
+    connectionStateRecovery: {}            
+  });
 
   io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log('✅ User connected:', socket.id);
 
-    socket.on('join room', async (senderId, receiverId) => {
-      await socket.join(senderId + "_" + receiverId)
-    })
-    socket.on('leave room', async (senderId, receiverId) => {
-      await socket.leave(senderId + "_" + receiverId);
+    socket.on('joinRoom', async (senderId, receiverId) => {
+        const roomName = `${receiverId}_${senderId}`;
+        await socket.join(roomName);
     });
-  
-    
 
-    socket.on('chat message', async (msg, receiverId, senderId) => {
-
-      if(await followerService.isFollowing(senderId, receiverId) && await followerService.isFollowing(receiverId, senderId)){
-        try{
-          const message = await chatService.createMessage(senderId,receiverId,msg)
-          io.to(senderId + "_" + receiverId).emit('chat message', msg, message.createdAt);
-        }catch(e){
-          throw new InternalServerErrorException()
-        }
+    socket.on('leaveRoom', async (senderId, receiverId) => {
+        const roomName = `${receiverId}_${senderId}`;
+        await socket.leave(roomName);
         
-      }
     });
 
-    socket.on('bring room', async (receiverId, senderId) => {
-      const messages = await chatService.getChatByUserId(senderId,receiverId)
-      messages.map(msg => io.to(receiverId + "_" + senderId).emit('chat message', msg.content, msg.createdAt))
+    socket.on('chatMessage', async (msg, receiverId, senderId) => {
+        if (await followerService.isFollowing(senderId, receiverId) && await followerService.isFollowing(receiverId, senderId)) {
+            try {
+                const message = await chatService.createMessage(senderId, receiverId, msg);
+                const roomName = `${senderId}_${receiverId}`;
+                io.to(roomName).emit('chatMessage', msg, message.createdAt);
+                
+            } catch (e) {
+                console.error(e);
+            }
+        }
     });
 
+    socket.on('bringRoom', async (receiverId, senderId) => {
+        const roomName = `${receiverId}_${senderId}`;
+        const messages = await chatService.getChatByUserId(senderId, receiverId);
+        
+        
+        socket.emit('chatHistory', messages);
+    });
 
     socket.on('disconnect', () => {
-      console.log('user disconnected');
+        console.log('❌ User disconnected:', socket.id);
     });
-
   });
 }
 

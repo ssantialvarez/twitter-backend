@@ -22,6 +22,7 @@ describe('Auth Test', () => {
             id:'a',
             name: 'julian alvarez',
             profilePicture: 'test.jpg',
+            public: true
         })
         const mockGenerateAccessToken = jest.mocked(generateAccessToken);
         const mockEncryptPassword = jest.mocked(encryptPassword);
@@ -30,7 +31,7 @@ describe('Auth Test', () => {
         mockGenerateAccessToken.mockReturnValue('token')
         UserRepositoryMock.getByEmailOrUsername.mockResolvedValue(null)
         UserRepositoryMock.create.mockResolvedValue(user)
-        const returnedToken = await service.signup({email:"email@email.com", password: 'password', username: 'juli'})
+        const returnedToken = await service.signup({email:"email@email.com", password: 'password', username: 'juli', name: "julian"})
         
         expect(UserRepositoryMock.getByEmailOrUsername).toHaveBeenCalledWith("email@email.com", 'juli')
         expect(mockEncryptPassword).toHaveBeenCalledWith('password')
@@ -47,13 +48,15 @@ describe('Auth Test', () => {
             password: 'password',
             profilePicture: 'test.jpg',
             public: true,
-            username: 'juli'
+            username: 'juli',
+            followers: [],
+            following: []
         })
     
         UserRepositoryMock.getByEmailOrUsername.mockResolvedValue(user)
 
 
-        await expect(service.signup({email:"email@email.com", password: 'password', username: 'juli'})).rejects.toThrow('Conflict')
+        await expect(service.signup({email:"email@email.com", password: 'password', username: 'juli', name: "julian"})).rejects.toThrow('Conflict')
         expect(UserRepositoryMock.getByEmailOrUsername).toHaveBeenCalledWith("email@email.com", 'juli')
     })
   }),
@@ -67,7 +70,9 @@ describe('Auth Test', () => {
             password: 'password',
             profilePicture: 'test.jpg',
             public: true,
-            username: 'juli'
+            username: 'juli',
+            followers: [],
+            following: []
         })
         const mockCheckPassword = jest.mocked(checkPassword);
         const mockGenerateAccessToken = jest.mocked(generateAccessToken)
@@ -92,7 +97,9 @@ describe('Auth Test', () => {
             password: 'password',
             profilePicture: 'test.jpg',
             public: true,
-            username: 'juli'
+            username: 'juli',
+            followers: [],
+            following: []
         })
         const mockCheckPassword = jest.mocked(checkPassword);
         

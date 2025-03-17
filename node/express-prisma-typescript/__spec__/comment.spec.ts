@@ -55,7 +55,7 @@ describe('Comment Test', () => {
         const result = await service.createComment('b', '1', {content: 'respuesta', images})
 
         expect(result.comment).toStrictEqual(commentToBeReturned)
-        expect(result.urls).toContain('returnedPresignedUrl')
+        expect(result.images).toContain('returnedPresignedUrl')
         expect(PostRepositoryMock.getById).toHaveBeenCalledWith('1')
         expect(UserRepositoryMock.isPublic).toHaveBeenCalledWith('a')
         expect(FollowerRepositoryMock.getFollowing).not.toHaveBeenCalled()
@@ -96,7 +96,7 @@ describe('Comment Test', () => {
   }),
   describe('get comments by post', () => { 
       it('gets comments succesfully', async () => {
-        const author = new UserViewDTO({id:'a', name:'john doe', profilePicture: 'test.jpg', username: 'xmiliamx'})  
+        const author = new UserViewDTO({id:'a', name:'john doe', profilePicture: 'test.jpg', username: 'xmiliamx', createdAt: new Date(), public: true})  
         let post1 = new ExtendedPostDTO({
           author,
           authorId: 'a',
@@ -106,7 +106,9 @@ describe('Comment Test', () => {
           images: ['test.jpg'],
           qtyComments: 0,
           qtyLikes: 0,
-          qtyRetweets: 0
+          qtyRetweets: 0,
+          parentPostId: 'c',
+          reactions: []
         })
         let post2 = new ExtendedPostDTO({
           author,
@@ -117,7 +119,9 @@ describe('Comment Test', () => {
           images: [],
           qtyComments: 0,
           qtyLikes: 0,
-          qtyRetweets: 0
+          qtyRetweets: 0,
+          parentPostId: 'c',
+          reactions: []
         })
         let postsToBeReturned = [post1, post2]
         CommentRepositoryMock.getAllByDatePaginated.mockResolvedValue(postsToBeReturned)

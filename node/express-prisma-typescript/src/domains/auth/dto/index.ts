@@ -49,6 +49,5 @@ export class LoginInputDTO {
 
   @IsString()
   @IsNotEmpty()
-  @IsStrongPassword()
     password!: string
 }

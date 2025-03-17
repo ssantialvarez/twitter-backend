@@ -3,5 +3,6 @@ export const PostRepositoryMock = {
     getAllByDatePaginated: jest.fn(),
     delete: jest.fn(),
     getById: jest.fn(),
-    getByAuthorId: jest.fn()
+    getByAuthorId: jest.fn(),
+    getByFollow: jest.fn()
 }

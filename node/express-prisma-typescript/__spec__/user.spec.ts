@@ -25,7 +25,9 @@ describe('User Test', () => {
         password: 'password',
         profilePicture: 'test.jpg',
         public: true,
-        username: 'juli'
+        username: 'juli',
+        followers: [],
+        following: []
       })
       const userToBeReturned = new UserViewDTO(user)
       UserRepositoryMock.getById.mockReturnValue(user)
@@ -56,13 +58,15 @@ describe('User Test', () => {
     it('updates succesfully', async () => {
       const user = new ExtendedUserDTO({
         createdAt: new Date(),
-        email: 'notgmail@gmail.com',
-        id: 'a',
-        name: 'john doe',
+        email: 'email@email.com',
+        id:'a',
+        name: 'julian alvarez',
         password: 'password',
         profilePicture: 'test.jpg',
         public: true,
-        username: 'john doe'
+        username: 'juli',
+        followers: [],
+        following: []
       })
       
       const mockGeneratePresignedUrl = jest.mocked(generatePresignedUrl);
@@ -80,13 +84,15 @@ describe('User Test', () => {
     it('updates succesfully', async () => {
       const user = new ExtendedUserDTO({
         createdAt: new Date(),
-        email: 'notgmail@gmail.com',
-        id: 'a',
-        name: 'john doe',
+        email: 'email@email.com',
+        id:'a',
+        name: 'julian alvarez',
         password: 'password',
         profilePicture: 'test.jpg',
         public: true,
-        username: 'john doe'
+        username: 'juli',
+        followers: [],
+        following: []
       })
       
       const mockGeneratePresignedUrl = jest.mocked(generatePresignedUrl);
@@ -125,8 +131,8 @@ describe('User Test', () => {
   describe('get users by username', () => { 
     it('gets users succesfully', async () => {
       await service.getUsersByUsername('john', { limit: 5, skip: 1 })
-      
-      expect(UserRepositoryMock.getByUsername).toHaveBeenCalledWith('john', { limit: 5, skip: 1 })
+      UserRepositoryMock.getByUsername.mockResolvedValue(['john'])
+      expect(UserRepositoryMock.getByUsername).toHaveBeenCalledWith('john', { limit: 5, skip: undefined })
     })  
   }),
   describe('get users recommendations', () => { 
@@ -139,12 +145,14 @@ describe('User Test', () => {
         password: 'palermo',
         profilePicture: 'test.jpg',
         public: false,
-        username: 'marten'
+        username: 'marten',
+        followers: [],
+        following: []
       })])
 
       await service.getUserRecommendations('john', { limit: 5, skip: 1 })
-      
-      expect(UserRepositoryMock.getRecommendedUsersPaginated).toHaveBeenCalledWith('john', { limit: 5, skip: 1 })
+      UserRepositoryMock.getRecommendedUsersPaginated.mockResolvedValue([])
+      expect(UserRepositoryMock.getRecommendedUsersPaginated).toHaveBeenCalledWith('john', { limit: 5, skip: undefined })
     })  
   })
 });

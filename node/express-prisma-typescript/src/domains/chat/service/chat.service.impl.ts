@@ -1,7 +1,8 @@
-import { InternalServerErrorException } from "@utils";
+import { InternalServerErrorException, NotFoundException } from "@utils";
 import { MessageDTO } from "../dto";
 import { ChatRepository } from "../repository";
 import { ChatService } from "./chat.service";
+import { UserViewDTO } from "@domains/user/dto";
 
 export class ChatServiceImpl implements ChatService {
   constructor (private readonly repository: ChatRepository) {}
@@ -12,6 +13,27 @@ export class ChatServiceImpl implements ChatService {
   }
 
   async getChatByUserId (senderId: string, receiverId: string): Promise<MessageDTO[]> {
-    return await this.repository.getChat(senderId,receiverId)
+    try{
+      return await this.repository.getChat(senderId,receiverId)
+    }catch(e){
+      throw new NotFoundException('chat')
+    }
+  }
+
+  async getPossibleChats (id: string): Promise<UserViewDTO[]> {
+    try{
+      return await this.repository.getPossibleChats(id)
+    }catch(e){
+      throw new NotFoundException('chat')
+    }
+    
+  }
+
+  async getActiveChats (id: string): Promise<UserViewDTO[]> {
+    try{
+      return await this.repository.getActiveChats(id)
+    }catch(e){
+      throw new NotFoundException('chat')
+    }
   }
 }

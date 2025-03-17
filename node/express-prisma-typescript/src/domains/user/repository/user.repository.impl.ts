@@ -96,7 +96,10 @@ export class UserRepositoryImpl implements UserRepository {
             email
           },
           {
-            username
+            username:{
+              contains: username,
+              mode: 'insensitive'
+            }
           }
         ],
         deletedAt: null 
@@ -142,7 +145,8 @@ export class UserRepositoryImpl implements UserRepository {
       where:{
         AND: [
           {username:{
-            contains:username
+            contains:username,
+            mode:'insensitive'
           },
           deletedAt: null
           }

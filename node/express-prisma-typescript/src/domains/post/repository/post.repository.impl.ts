@@ -140,7 +140,15 @@ export class PostRepositoryImpl implements PostRepository {
         authorId,
         deletedAt: null,
         parentPost: null
-      }
+      },
+      orderBy: [
+        {
+          createdAt: 'desc'
+        },
+        {
+          id: 'asc'
+        }
+      ]
 
     })
 

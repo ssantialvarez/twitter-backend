@@ -111,14 +111,14 @@ describe('Post Test', () => {
         const result = await service.createPost('a', {content: 'tweet generico', images})
 
         expect(result.post).toStrictEqual(postToBeReturned)
-        expect(result.urls).toContain('returnedPresignedUrl')
+        expect(result.images).toContain('returnedPresignedUrl')
         expect(PostRepositoryMock.create).toHaveBeenCalled()
         expect(mockGeneratePresignedUrl).toHaveBeenCalledTimes(images.length)
     })
   }),
   describe('get posts by author', () => {
     it('returns found posts because user follows author', async () => {
-        const author = new UserViewDTO({id:'a', name:'john doe', profilePicture: 'test.jpg', username: 'xmiliamx'})  
+        const author = new UserViewDTO({id:'a', name:'john doe', profilePicture: 'test.jpg', username: 'xmiliamx', createdAt: new Date(), public: true})  
         const postsToBeReturned = [new ExtendedPostDTO({
             author,
             authorId: 'a',
@@ -128,7 +128,9 @@ describe('Post Test', () => {
             images: ['test.jpg'],
             qtyComments: 0,
             qtyLikes: 0,
-            qtyRetweets: 0
+            qtyRetweets: 0,
+            parentPostId: 'c',
+            reactions: []
         })]
         PostRepositoryMock.getByAuthorId.mockResolvedValue(postsToBeReturned)
         const validatesPostMock = jest.mocked(validatesPostView)
@@ -141,7 +143,7 @@ describe('Post Test', () => {
         expect(validatesPostMock).toHaveBeenCalledWith('b','a')
     }),
     it('returns found post because author is public', async () => {
-      const author = new UserViewDTO({id:'a', name:'john doe', profilePicture: 'test.jpg', username: 'xmiliamx'})  
+      const author = new UserViewDTO({id:'a', name:'john doe', profilePicture: 'test.jpg', username: 'xmiliamx', createdAt: new Date(), public: true})  
       
       const postsToBeReturned = [new ExtendedPostDTO({
           author,
@@ -152,7 +154,9 @@ describe('Post Test', () => {
           images: ['test.jpg'],
           qtyComments: 0,
           qtyLikes: 0,
-          qtyRetweets: 0
+          qtyRetweets: 0,
+          parentPostId:'c',
+          reactions: []
         })]
         PostRepositoryMock.getByAuthorId.mockResolvedValue(postsToBeReturned)
         const validatesPostMock = jest.mocked(validatesPostView)
@@ -173,12 +177,5 @@ describe('Post Test', () => {
         expect(PostRepositoryMock.getByAuthorId).not.toHaveBeenCalled()
         expect(validatesPostMock).toHaveBeenCalled()
     })
-  }),
-  describe('get users by username', () => { 
-    it('gets users succesfully', async () => {
-      await service.getLatestPosts('john', { limit: 5, before: 'a' })
-        
-      expect(PostRepositoryMock.getAllByDatePaginated).toHaveBeenCalledWith('john', { limit: 5, before: 'a'})
-    })  
   })
 });

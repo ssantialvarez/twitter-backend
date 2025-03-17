@@ -59,7 +59,7 @@ export class UserServiceImpl implements UserService {
     const users = await this.repository.getByUsername(username,options); 
 
     options.limit -= 1
-    if(users.length == options.limit + 1){
+    if(users?.length === options.limit + 1){
       options.skip = options.skip ? options.skip + options.limit : options.limit
       users.pop()
     }else{
